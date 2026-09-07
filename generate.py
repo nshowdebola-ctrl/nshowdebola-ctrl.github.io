@@ -76,6 +76,10 @@ def copy_photos(products: list[dict]) -> None:
         product["foto_web"] = f"assets/photos/{dest.name}"
 
 
+# Crie uma conta grátis em https://cusdis.com, cadastre o site
+# (nshowdebola-ctrl.github.io) e cole o App ID gerado aqui:
+CUSDIS_APP_ID = ""
+
 SOCIAL_LINKS = [
     ("TikTok · @achadinhosmultiuso10", "https://www.tiktok.com/@achadinhosmultiuso10"),
     ("TikTok · @alexcunhaccb", "https://www.tiktok.com/@alexcunhaccb"),
@@ -120,6 +124,21 @@ def render_social_links() -> str:
         for label, url in SOCIAL_LINKS
     )
     return f'<div class="social">\n{links}\n</div>'
+
+
+def render_comments(p: dict) -> str:
+    if not CUSDIS_APP_ID:
+        return ""
+    page_url = f"{SITE_URL}/produtos/{p['id']}.html"
+    return f'''<h2 style="margin-top:40px;">Comentários</h2>
+<div id="cusdis_thread"
+  data-host="https://cusdis.com"
+  data-app-id="{CUSDIS_APP_ID}"
+  data-page-id="{p['id']}"
+  data-page-url="{page_url}"
+  data-page-title="{html.escape(p['titulo'])}"
+></div>
+<script async defer src="https://cusdis.com/js/cusdis.es.js"></script>'''
 
 
 def render_index(products: list[dict]) -> str:
@@ -176,6 +195,7 @@ def render_product_page(p: dict) -> str:
 <a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">Ver oferta na Amazon</a>
 <p>Segue a gente pra mais achadinhos:</p>
 {render_social_links()}
+{render_comments(p)}
 <p class="disclosure">{DISCLOSURE}</p>
 </body>
 </html>

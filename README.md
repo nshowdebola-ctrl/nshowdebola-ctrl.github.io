@@ -22,3 +22,14 @@ produto pra `assets/photos/` e gera `index.html` + `produtos/<id>.html`.
 
 GitHub Pages já serve automaticamente a branch `main` deste repositório (nome especial
 `nshowdebola-ctrl.github.io` = domínio raiz), sem build step.
+
+## Comentários (Cusdis)
+
+As páginas de produto já têm o widget de comentários pronto, só falta ativar:
+
+1. Crie uma conta grátis em https://cusdis.com.
+2. Cadastre um novo site apontando pra `nshowdebola-ctrl.github.io`.
+3. Copie o **App ID** gerado e cole em `CUSDIS_APP_ID` no topo de `generate.py`.
+4. Rode `python3 generate.py` de novo e faça commit/push.
+
+Enquanto `CUSDIS_APP_ID` estiver vazio, o widget não aparece (sem erro).
