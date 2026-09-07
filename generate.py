@@ -76,6 +76,12 @@ def copy_photos(products: list[dict]) -> None:
         product["foto_web"] = f"assets/photos/{dest.name}"
 
 
+SOCIAL_LINKS = [
+    ("TikTok · @achadinhosmultiuso10", "https://www.tiktok.com/@achadinhosmultiuso10"),
+    ("TikTok · @alexcunhaccb", "https://www.tiktok.com/@alexcunhaccb"),
+    ("YouTube · Notícias Show de Bola", "https://www.youtube.com/@NoticiasShowdeBola"),
+]
+
 DISCLOSURE = (
     "Como Associado Amazon, este site pode ganhar comissões por compras qualificadas feitas "
     "através dos links de produtos, sem nenhum custo extra para você."
@@ -101,7 +107,19 @@ header p { color: #777; margin-top: 0; }
   padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 16px 0; }
 .disclosure { font-size: 0.8rem; color: #888; border-top: 1px solid #ddd; margin-top: 40px; padding-top: 12px; }
 a.voltar { display: inline-block; margin-bottom: 16px; }
+.social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.social a { display: inline-block; background: #222; color: #fff; text-decoration: none;
+  font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 20px; }
+.social a:hover { background: #444; }
 """
+
+
+def render_social_links() -> str:
+    links = "\n".join(
+        f'<a href="{url}" target="_blank" rel="noopener">{html.escape(label)}</a>'
+        for label, url in SOCIAL_LINKS
+    )
+    return f'<div class="social">\n{links}\n</div>'
 
 
 def render_index(products: list[dict]) -> str:
@@ -128,6 +146,7 @@ def render_index(products: list[dict]) -> str:
 <header>
 <h1>{SITE_TITLE}</h1>
 <p>Achadinhos da Amazon selecionados — clique pra ver o produto e o link direto pra comprar.</p>
+{render_social_links()}
 </header>
 <div class="grid">
 {cards}
@@ -155,6 +174,8 @@ def render_product_page(p: dict) -> str:
 <img class="produto-foto" src="../{p['foto_web']}" alt="{html.escape(p['titulo'])}">
 {preco_html}
 <a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">Ver oferta na Amazon</a>
+<p>Segue a gente pra mais achadinhos:</p>
+{render_social_links()}
 <p class="disclosure">{DISCLOSURE}</p>
 </body>
 </html>
