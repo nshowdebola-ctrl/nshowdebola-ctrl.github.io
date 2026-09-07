@@ -78,7 +78,7 @@ def copy_photos(products: list[dict]) -> None:
 
 # Crie uma conta grátis em https://cusdis.com, cadastre o site
 # (nshowdebola-ctrl.github.io) e cole o App ID gerado aqui:
-CUSDIS_APP_ID = ""
+CUSDIS_APP_ID = "bc04f0f0-fc8f-46cc-83f7-82436325048f"
 
 SOCIAL_LINKS = [
     ("TikTok · @achadinhosmultiuso10", "https://www.tiktok.com/@achadinhosmultiuso10"),
