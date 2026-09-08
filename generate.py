@@ -264,6 +264,45 @@ document.addEventListener('DOMContentLoaded', iniciarCarrosselOfertas);
 """
 
 
+def render_meta_seo(url: str, title: str, description: str, image_url: str | None = None) -> str:
+    """Canonical + Open Graph + Twitter Card. image_url deve ser absoluta (SITE_URL/...)."""
+    img_tags = ""
+    if image_url:
+        img_tags = f'''<meta property="og:image" content="{image_url}">
+<meta name="twitter:image" content="{image_url}">'''
+    return f'''<link rel="canonical" href="{url}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{url}">
+<meta property="og:title" content="{html.escape(title)}">
+<meta property="og:description" content="{html.escape(description)}">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{html.escape(title)}">
+<meta name="twitter:description" content="{html.escape(description)}">
+{img_tags}'''
+
+
+def render_product_jsonld(p: dict, image_url: str) -> str:
+    data = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": p["titulo"],
+        "image": [image_url],
+        "url": f"{SITE_URL}/produtos/{p['id']}.html",
+    }
+    if p.get("preco"):
+        preco_num = _preco_num(p["preco"])
+        if preco_num is not None:
+            data["offers"] = {
+                "@type": "Offer",
+                "url": p["link"],
+                "priceCurrency": "BRL",
+                "price": f"{preco_num:.2f}",
+                "availability": "https://schema.org/InStock",
+            }
+    return f'<script type="application/ld+json">{json.dumps(data, ensure_ascii=False)}</script>'
+
+
 def render_topbar(base_path: str, tem_shopee: bool) -> str:
     logo_html = f'<img class="logo-sm" src="{base_path}assets/logo.png" alt="{SITE_TITLE}">' if LOGO_PATH.exists() else ""
     shopee_link = f'<a href="{base_path}index.html#vitrine">Shopee</a>' if tem_shopee else ""
@@ -403,6 +442,7 @@ def render_index(products: list[dict]) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{SITE_TITLE} — achadinhos da Amazon com preço bom</title>
 <meta name="description" content="Seleção de achadinhos da Amazon: produtos úteis e baratos, com link direto pra comprar.">
+{render_meta_seo(SITE_URL + "/", SITE_TITLE, "Seleção de achadinhos da Amazon: produtos úteis e baratos, com link direto pra comprar.", f"{SITE_URL}/assets/logo.png" if LOGO_PATH.exists() else None)}
 <style>{BASE_CSS}</style>
 <script>{STORE_FILTER_JS}</script>
 </head>
@@ -438,13 +478,17 @@ def render_product_page(p: dict, tem_shopee: bool) -> str:
         if p.get("desconto_pct") else ""
     )
     preco_html = f'<p class="preco" style="font-size:1.3rem;color:#c0392b;font-weight:700;">{html.escape(p["preco"])}</p>' if p.get("preco") else ""
+    descricao_seo = f"{p['titulo']}: veja o preço e compre direto na Amazon."
+    imagem_absoluta = f"{SITE_URL}/{p['foto_web']}"
     return f"""<!doctype html>
 <html lang="pt-br">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(p['titulo'])} — {SITE_TITLE}</title>
-<meta name="description" content="{html.escape(p['titulo'])}: veja o preço e compre direto na Amazon.">
+<meta name="description" content="{html.escape(descricao_seo)}">
+{render_meta_seo(f"{SITE_URL}/produtos/{p['id']}.html", p['titulo'], descricao_seo, imagem_absoluta)}
+{render_product_jsonld(p, imagem_absoluta)}
 <style>{BASE_CSS}</style>
 </head>
 <body>
@@ -478,6 +522,7 @@ def render_sobre_page(tem_shopee: bool) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sobre — {SITE_TITLE}</title>
 <meta name="description" content="Quem somos e como funciona o {SITE_TITLE}.">
+{render_meta_seo(f"{SITE_URL}/sobre.html", f"Sobre — {SITE_TITLE}", f"Quem somos e como funciona o {SITE_TITLE}.")}
 <style>{BASE_CSS}</style>
 </head>
 <body>
@@ -498,6 +543,24 @@ parceiras.</p>
 """
 
 
+def render_sitemap(products: list[dict]) -> str:
+    from datetime import date
+
+    hoje = date.today().isoformat()
+    urls = [f"{SITE_URL}/", f"{SITE_URL}/sobre.html"] + [
+        f"{SITE_URL}/produtos/{p['id']}.html" for p in products
+    ]
+    entries = "\n".join(f"  <url><loc>{u}</loc><lastmod>{hoje}</lastmod></url>" for u in urls)
+    return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{entries}\n</urlset>\n'
+
+
+ROBOTS_TXT = f"""User-agent: *
+Allow: /
+
+Sitemap: {SITE_URL}/sitemap.xml
+"""
+
+
 def main():
     tag = _amazon_tag()
     products = collect_posted_products(tag)
@@ -514,6 +577,8 @@ def main():
     for p in products:
         (PRODUTOS_OUT / f"{p['id']}.html").write_text(render_product_page(p, tem_shopee), encoding="utf-8")
 
+    (SITE_DIR / "sitemap.xml").write_text(render_sitemap(products), encoding="utf-8")
+    (SITE_DIR / "robots.txt").write_text(ROBOTS_TXT, encoding="utf-8")
     (SITE_DIR / ".nojekyll").touch()
 
     print(f"{len(products)} produtos publicados em {SITE_DIR}")

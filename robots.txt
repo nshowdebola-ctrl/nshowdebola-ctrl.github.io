@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nshowdebola-ctrl.github.io/sitemap.xml
