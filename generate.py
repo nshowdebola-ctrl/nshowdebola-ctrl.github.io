@@ -207,13 +207,17 @@ section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); 
 .card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
 .card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
   font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
-.oferta-dia { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--card-bg);
-  border: 2px solid #e11d48; border-radius: 12px; padding: 16px; margin: 20px 0; text-decoration: none;
+.ofertas-carousel { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+  margin: 20px 0; padding-bottom: 4px; scrollbar-width: none; }
+.ofertas-carousel::-webkit-scrollbar { display: none; }
+.oferta-dia { flex: 0 0 auto; scroll-snap-align: start; width: min(360px, 88vw);
+  display: flex; gap: 16px; align-items: center; background: var(--card-bg);
+  border: 2px solid #e11d48; border-radius: 12px; padding: 16px; text-decoration: none;
   color: inherit; box-shadow: 0 2px 8px rgba(225,29,72,.15); }
-.oferta-dia img { width: 110px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.oferta-dia img { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
 .oferta-dia .tag { display: inline-block; background: #e11d48; color: #fff; font-weight: 800;
   font-size: 0.75rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 6px; }
-.oferta-dia .titulo { font-weight: 700; margin: 0 0 4px; }
+.oferta-dia .titulo { font-weight: 700; margin: 0 0 4px; font-size: 0.9rem; }
 .produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
@@ -244,6 +248,19 @@ function filtrarLoja(loja, btn) {
     sec.style.display = temVisivel ? '' : 'none';
   });
 }
+
+function iniciarCarrosselOfertas() {
+  var el = document.getElementById('ofertas-carousel');
+  if (!el) return;
+  var cards = el.children;
+  if (cards.length <= 1) return;
+  var i = 0;
+  setInterval(function () {
+    i = (i + 1) % cards.length;
+    cards[i].scrollIntoView({behavior: 'smooth', inline: 'start', block: 'nearest'});
+  }, 4000);
+}
+document.addEventListener('DOMContentLoaded', iniciarCarrosselOfertas);
 """
 
 
@@ -316,29 +333,43 @@ def render_card(p: dict) -> str:
 </a>'''
 
 
-def render_oferta_do_dia(products: list[dict]) -> str:
-    com_desconto = [p for p in products if p.get("desconto_pct")]
-    if com_desconto:
-        melhor = max(com_desconto, key=lambda p: p["desconto_pct"])
-        tag = f"🔥 Oferta do dia · -{melhor['desconto_pct']}%"
-        preco_original_html = f'<p class="preco-original">{html.escape(melhor["preco_original"])}</p>'
+def _oferta_card_html(p: dict) -> str:
+    if p.get("desconto_pct"):
+        tag = f"🔥 Oferta · -{p['desconto_pct']}%"
+        preco_original_html = f'<p class="preco-original">{html.escape(p["preco_original"])}</p>'
     else:
-        destaques = [p for p in products if p.get("destaque") and p.get("preco")]
-        if not destaques:
-            return ""
-        melhor = min(destaques, key=lambda p: _preco_num(p["preco"]) or float("inf"))
         tag = "🔥 Oferta · melhor preço"
         preco_original_html = ""
 
-    return f'''<a class="oferta-dia" href="produtos/{melhor['id']}.html">
-  <img src="{melhor['foto_web']}" alt="{html.escape(melhor['titulo'])}">
+    return f'''<a class="oferta-dia" href="produtos/{p['id']}.html">
+  <img src="{p['foto_web']}" alt="{html.escape(p['titulo'])}">
   <div>
     <span class="tag">{tag}</span>
-    <p class="titulo">{html.escape(melhor['titulo'])}</p>
+    <p class="titulo">{html.escape(p['titulo'])}</p>
     {preco_original_html}
-    <p class="preco" style="font-size:1.1rem;">{html.escape(melhor['preco'])}</p>
+    <p class="preco" style="font-size:1.1rem;">{html.escape(p['preco'])}</p>
   </div>
 </a>'''
+
+
+def render_ofertas(products: list[dict]) -> str:
+    """Reúne todos os produtos com desconto real (ordenados pelo maior %) e,
+    na falta desses, os produtos "destaque" (ordenados por menor preço).
+    Mais de uma oferta vira carrossel com auto-scroll (ver iniciarCarrosselOfertas
+    em STORE_FILTER_JS); com só uma, o carrossel simplesmente não anda sozinho."""
+    com_desconto = sorted(
+        (p for p in products if p.get("desconto_pct")), key=lambda p: -p["desconto_pct"]
+    )
+    destaques = sorted(
+        (p for p in products if p.get("destaque") and p.get("preco") and not p.get("desconto_pct")),
+        key=lambda p: _preco_num(p["preco"]) or float("inf"),
+    )
+    ofertas = com_desconto + destaques
+    if not ofertas:
+        return ""
+
+    cards = "\n".join(_oferta_card_html(p) for p in ofertas)
+    return f'<div class="ofertas-carousel" id="ofertas-carousel">\n{cards}\n</div>'
 
 
 def render_store_nav(products: list[dict]) -> str:
@@ -379,7 +410,7 @@ def render_index(products: list[dict]) -> str:
 {render_topbar("", tem_shopee)}
 <h1 class="sr-only">{SITE_TITLE}</h1>
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
-{render_oferta_do_dia(products)}
+{render_ofertas(products)}
 {render_store_nav(products)}
 <nav class="categorias">
 {nav}

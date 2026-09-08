@@ -55,13 +55,17 @@ section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); 
 .card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
 .card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
   font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
-.oferta-dia { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--card-bg);
-  border: 2px solid #e11d48; border-radius: 12px; padding: 16px; margin: 20px 0; text-decoration: none;
+.ofertas-carousel { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+  margin: 20px 0; padding-bottom: 4px; scrollbar-width: none; }
+.ofertas-carousel::-webkit-scrollbar { display: none; }
+.oferta-dia { flex: 0 0 auto; scroll-snap-align: start; width: min(360px, 88vw);
+  display: flex; gap: 16px; align-items: center; background: var(--card-bg);
+  border: 2px solid #e11d48; border-radius: 12px; padding: 16px; text-decoration: none;
   color: inherit; box-shadow: 0 2px 8px rgba(225,29,72,.15); }
-.oferta-dia img { width: 110px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.oferta-dia img { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
 .oferta-dia .tag { display: inline-block; background: #e11d48; color: #fff; font-weight: 800;
   font-size: 0.75rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 6px; }
-.oferta-dia .titulo { font-weight: 700; margin: 0 0 4px; }
+.oferta-dia .titulo { font-weight: 700; margin: 0 0 4px; font-size: 0.9rem; }
 .produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
@@ -94,7 +98,7 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <img class="produto-foto" src="../assets/photos/mini-bola-trionda.jpg" alt="Mini Bola Trionda da Copa do Mundo da FIFA 26™ Adidas">
 
 
-
+<p class="preco" style="font-size:1.3rem;color:#c0392b;font-weight:700;">R$ 99,98</p>
 <div class="btn-row">
 <a class="btn-comprar" href="https://www.amazon.com.br/dp/B0DLHHKFGW?tag=alexcunha-20" rel="nofollow sponsored noopener" target="_blank">🛒 Quero esse! (Amazon)</a>
 
