@@ -183,6 +183,7 @@ section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); 
   padding: 12px 24px; border-radius: 8px; text-decoration: none; }
 .btn-comprar.shopee { background: var(--accent-shopee); color: #fff; }
 .disclosure { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 40px; padding-top: 12px; }
+.disclosure a { color: inherit; }
 a.voltar { display: inline-block; margin-bottom: 16px; }
 .social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; justify-content: center; }
 .social a { display: inline-block; background: #222; color: #fff; text-decoration: none;
@@ -312,7 +313,7 @@ def render_index(products: list[dict]) -> str:
 <footer>
 <p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
 {render_social_links()}
-<p class="disclosure">{DISCLOSURE}</p>
+<p class="disclosure"><a href="sobre.html#aviso">Aviso de afiliado</a></p>
 </footer>
 </body>
 </html>
@@ -344,7 +345,7 @@ def render_product_page(p: dict, tem_shopee: bool) -> str:
 <footer>
 <p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
 {render_social_links()}
-<p class="disclosure">{DISCLOSURE}</p>
+<p class="disclosure"><a href="../sobre.html#aviso">Aviso de afiliado</a></p>
 </footer>
 </body>
 </html>
@@ -369,10 +370,10 @@ def render_sobre_page(tem_shopee: bool) -> str:
 da Shopee) que a gente também divulga no TikTok, e reunimos tudo aqui com o link direto pra
 comprar. Não somos Amazon nem Shopee — as compras são feitas diretamente nos sites das lojas
 parceiras.</p>
+<p class="disclosure" id="aviso">{DISCLOSURE}</p>
 <footer>
 <p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
 {render_social_links()}
-<p class="disclosure">{DISCLOSURE}</p>
 </footer>
 </body>
 </html>
