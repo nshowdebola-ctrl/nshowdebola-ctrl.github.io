@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vollo Bomba de Inflar Dupla Ação — Achadinhos</title>
+<title>Vollo Bomba de Inflar Dupla Ação — Achadinhos da Web</title>
 <meta name="description" content="Vollo Bomba de Inflar Dupla Ação: veja o preço e compre direto na Amazon.">
 <style>
 :root {
@@ -22,8 +22,10 @@
 body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
   background: var(--bg); color: var(--fg); }
 header { text-align: center; padding: 12px 0 4px; }
-header img.logo { max-height: 72px; margin-bottom: 8px; }
+header img.logo { width: min(220px, 60vw); height: auto; margin-bottom: 4px; }
 header h1 { font-size: 1.8rem; margin: 4px 0; }
+header h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; }
 header p.tagline { color: var(--muted); margin-top: 0; }
 nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0; }
 nav.categorias a { background: var(--card-bg); border: 1px solid var(--border); color: inherit;

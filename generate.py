@@ -21,7 +21,7 @@ LOGO_PATH = SITE_DIR / "assets" / "logo.png"
 # normal, só não fica exposto aqui).
 EXCLUDED_CHANNELS = {"alexcunhaccb"}
 
-SITE_TITLE = "Achadinhos"
+SITE_TITLE = "Achadinhos da Web"
 SITE_URL = "https://nshowdebola-ctrl.github.io"
 
 # Ordem fixa de exibição das categorias. Qualquer categoria nova (ou produto
@@ -143,8 +143,10 @@ BASE_CSS = """
 body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
   background: var(--bg); color: var(--fg); }
 header { text-align: center; padding: 12px 0 4px; }
-header img.logo { max-height: 72px; margin-bottom: 8px; }
+header img.logo { width: min(220px, 60vw); height: auto; margin-bottom: 4px; }
 header h1 { font-size: 1.8rem; margin: 4px 0; }
+header h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; }
 header p.tagline { color: var(--muted); margin-top: 0; }
 nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0; }
 nav.categorias a { background: var(--card-bg); border: 1px solid var(--border); color: inherit;
@@ -249,8 +251,8 @@ def render_index(products: list[dict]) -> str:
 <body>
 <header>
 {render_logo()}
-<h1>{SITE_TITLE}</h1>
-<p class="tagline">Achadinhos da Amazon selecionados — clique pra ver o produto e o link direto pra comprar.</p>
+<h1{' class="sr-only"' if LOGO_PATH.exists() else ''}>{SITE_TITLE}</h1>
+<p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
 {render_social_links()}
 </header>
 <nav class="categorias">
