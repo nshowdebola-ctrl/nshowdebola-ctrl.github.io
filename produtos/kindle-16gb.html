@@ -6,28 +6,49 @@
 <title>Kindle 16 GB (Geração mais recente) - Leve e compacto, com tela antirreflexo, trocas de página mais rápidas, luz frontal ajustável e bateria de longa duração - Cor Preta — Achadinhos</title>
 <meta name="description" content="Kindle 16 GB (Geração mais recente) - Leve e compacto, com tela antirreflexo, trocas de página mais rápidas, luz frontal ajustável e bateria de longa duração - Cor Preta: veja o preço e compre direto na Amazon.">
 <style>
-:root { color-scheme: light dark; }
-body { font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 16px;
-  background: #fafafa; color: #1a1a1a; }
-@media (prefers-color-scheme: dark) { body { background: #121212; color: #eee; } }
-header h1 { font-size: 1.6rem; margin-bottom: 4px; }
-header p { color: #777; margin-top: 0; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
-.card { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; text-decoration: none;
-  color: inherit; display: block; background: white; }
-@media (prefers-color-scheme: dark) { .card { background: #1c1c1c; border-color: #333; } }
+:root {
+  color-scheme: light dark;
+  --accent: #ff9900;
+  --accent-shopee: #ee4d2d;
+  --bg: #fafafa;
+  --fg: #1a1a1a;
+  --card-bg: #ffffff;
+  --border: #e2e2e2;
+  --muted: #777;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121212; --fg: #eee; --card-bg: #1c1c1c; --border: #333; --muted: #999; }
+}
+body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
+  background: var(--bg); color: var(--fg); }
+header { text-align: center; padding: 12px 0 4px; }
+header img.logo { max-height: 72px; margin-bottom: 8px; }
+header h1 { font-size: 1.8rem; margin: 4px 0; }
+header p.tagline { color: var(--muted); margin-top: 0; }
+nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0; }
+nav.categorias a { background: var(--card-bg); border: 1px solid var(--border); color: inherit;
+  text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 6px 14px; border-radius: 20px; }
+nav.categorias a:hover { border-color: var(--accent); color: var(--accent); }
+section.categoria { margin: 32px 0; }
+section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); padding-left: 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin: 16px 0; }
+.card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none;
+  color: inherit; display: flex; flex-direction: column; background: var(--card-bg); transition: transform .15s; }
+.card:hover { transform: translateY(-3px); border-color: var(--accent); }
 .card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-.card .info { padding: 10px 12px; }
-.card .titulo { font-size: 0.95rem; font-weight: 600; margin: 0 0 4px; }
-.card .preco { color: #c0392b; font-weight: 700; }
+.card .info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
+.card .titulo { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; flex: 1; }
+.card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
+.card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
+  font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
 .produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
-.btn-comprar { display: inline-block; background: #ff9900; color: #111; font-weight: 700;
+.btn-comprar { display: inline-block; background: var(--accent); color: #111; font-weight: 700;
   padding: 12px 24px; border-radius: 8px; text-decoration: none; }
-.btn-comprar.shopee { background: #ee4d2d; color: #fff; }
-.disclosure { font-size: 0.8rem; color: #888; border-top: 1px solid #ddd; margin-top: 40px; padding-top: 12px; }
+.btn-comprar.shopee { background: var(--accent-shopee); color: #fff; }
+.disclosure { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 40px; padding-top: 12px; }
 a.voltar { display: inline-block; margin-bottom: 16px; }
-.social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; justify-content: center; }
 .social a { display: inline-block; background: #222; color: #fff; text-decoration: none;
   font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 20px; }
 .social a:hover { background: #444; }
@@ -39,7 +60,7 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <img class="produto-foto" src="../assets/photos/kindle-16gb.jpg" alt="Kindle 16 GB (Geração mais recente) - Leve e compacto, com tela antirreflexo, trocas de página mais rápidas, luz frontal ajustável e bateria de longa duração - Cor Preta">
 
 <div class="btn-row">
-<a class="btn-comprar" href="https://www.amazon.com.br/dp/B0CP31L73X?tag=alexcunha-20" rel="nofollow sponsored noopener" target="_blank">Ver oferta na Amazon</a>
+<a class="btn-comprar" href="https://www.amazon.com.br/dp/B0CP31L73X?tag=alexcunha-20" rel="nofollow sponsored noopener" target="_blank">🛒 Quero esse! (Amazon)</a>
 
 </div>
 <p>Segue a gente pra mais achadinhos:</p>

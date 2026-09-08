@@ -13,15 +13,28 @@ from pathlib import Path
 AFILIADO_DIR = Path("/home/alex/projetos/afiliado-tiktok")
 CHANNELS_DIR = AFILIADO_DIR / "data" / "channels"
 SITE_DIR = Path(__file__).resolve().parent
+PHOTOS_OUT = SITE_DIR / "assets" / "photos"
+PRODUTOS_OUT = SITE_DIR / "produtos"
+LOGO_PATH = SITE_DIR / "assets" / "logo.png"
 
 # Canais cujos produtos não devem aparecer no blog (o post no TikTok continua
 # normal, só não fica exposto aqui).
 EXCLUDED_CHANNELS = {"alexcunhaccb"}
-PHOTOS_OUT = SITE_DIR / "assets" / "photos"
-PRODUTOS_OUT = SITE_DIR / "produtos"
 
 SITE_TITLE = "Achadinhos"
 SITE_URL = "https://nshowdebola-ctrl.github.io"
+
+# Ordem fixa de exibição das categorias. Qualquer categoria nova (ou produto
+# sem "categoria" definida, que cai em "Outros") aparece depois, em ordem
+# alfabética.
+CATEGORY_ORDER = [
+    "Eletrônicos",
+    "Casa & Utilidades",
+    "Beleza",
+    "Livros",
+    "Esportes & Brinquedos",
+    "Ofertas",
+]
 
 
 def _load_json(path: Path):
@@ -66,6 +79,7 @@ def collect_posted_products(tag: str) -> list[dict]:
                 "id": product["id"],
                 "titulo": product["titulo"],
                 "preco": product.get("preco"),
+                "categoria": product.get("categoria", "Outros"),
                 "link": _affiliate_link(product["url_amazon"], tag),
                 # Shopee ainda não tem campo no products.json (afiliação pendente
                 # de aprovação) — quando existir, basta adicionar "url_shopee" ao
@@ -74,6 +88,16 @@ def collect_posted_products(tag: str) -> list[dict]:
                 "fotos": [AFILIADO_DIR / foto for foto in product["fotos"]],
             }
     return list(seen.values())
+
+
+def group_by_category(products: list[dict]) -> list[tuple[str, list[dict]]]:
+    by_cat: dict[str, list[dict]] = {}
+    for p in products:
+        by_cat.setdefault(p["categoria"], []).append(p)
+
+    ordered = [c for c in CATEGORY_ORDER if c in by_cat]
+    outros = sorted(c for c in by_cat if c not in CATEGORY_ORDER)
+    return [(cat, by_cat[cat]) for cat in ordered + outros]
 
 
 def copy_photos(products: list[dict]) -> None:
@@ -95,38 +119,67 @@ SOCIAL_LINKS = [
     ("YouTube · Notícias Show de Bola", "https://www.youtube.com/@NoticiasShowdeBola"),
 ]
 
+CTA_TEXTO = "🛒 Quero esse!"
+
 DISCLOSURE = (
     "Como Associado Amazon, este site pode ganhar comissões por compras qualificadas feitas "
     "através dos links de produtos, sem nenhum custo extra para você."
 )
 
 BASE_CSS = """
-:root { color-scheme: light dark; }
-body { font-family: system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 16px;
-  background: #fafafa; color: #1a1a1a; }
-@media (prefers-color-scheme: dark) { body { background: #121212; color: #eee; } }
-header h1 { font-size: 1.6rem; margin-bottom: 4px; }
-header p { color: #777; margin-top: 0; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
-.card { border: 1px solid #ddd; border-radius: 10px; overflow: hidden; text-decoration: none;
-  color: inherit; display: block; background: white; }
-@media (prefers-color-scheme: dark) { .card { background: #1c1c1c; border-color: #333; } }
+:root {
+  color-scheme: light dark;
+  --accent: #ff9900;
+  --accent-shopee: #ee4d2d;
+  --bg: #fafafa;
+  --fg: #1a1a1a;
+  --card-bg: #ffffff;
+  --border: #e2e2e2;
+  --muted: #777;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121212; --fg: #eee; --card-bg: #1c1c1c; --border: #333; --muted: #999; }
+}
+body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
+  background: var(--bg); color: var(--fg); }
+header { text-align: center; padding: 12px 0 4px; }
+header img.logo { max-height: 72px; margin-bottom: 8px; }
+header h1 { font-size: 1.8rem; margin: 4px 0; }
+header p.tagline { color: var(--muted); margin-top: 0; }
+nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0; }
+nav.categorias a { background: var(--card-bg); border: 1px solid var(--border); color: inherit;
+  text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 6px 14px; border-radius: 20px; }
+nav.categorias a:hover { border-color: var(--accent); color: var(--accent); }
+section.categoria { margin: 32px 0; }
+section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); padding-left: 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin: 16px 0; }
+.card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none;
+  color: inherit; display: flex; flex-direction: column; background: var(--card-bg); transition: transform .15s; }
+.card:hover { transform: translateY(-3px); border-color: var(--accent); }
 .card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-.card .info { padding: 10px 12px; }
-.card .titulo { font-size: 0.95rem; font-weight: 600; margin: 0 0 4px; }
-.card .preco { color: #c0392b; font-weight: 700; }
+.card .info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
+.card .titulo { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; flex: 1; }
+.card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
+.card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
+  font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
 .produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
-.btn-comprar { display: inline-block; background: #ff9900; color: #111; font-weight: 700;
+.btn-comprar { display: inline-block; background: var(--accent); color: #111; font-weight: 700;
   padding: 12px 24px; border-radius: 8px; text-decoration: none; }
-.btn-comprar.shopee { background: #ee4d2d; color: #fff; }
-.disclosure { font-size: 0.8rem; color: #888; border-top: 1px solid #ddd; margin-top: 40px; padding-top: 12px; }
+.btn-comprar.shopee { background: var(--accent-shopee); color: #fff; }
+.disclosure { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 40px; padding-top: 12px; }
 a.voltar { display: inline-block; margin-bottom: 16px; }
-.social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; justify-content: center; }
 .social a { display: inline-block; background: #222; color: #fff; text-decoration: none;
   font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 20px; }
 .social a:hover { background: #444; }
 """
+
+
+def render_logo() -> str:
+    if LOGO_PATH.exists():
+        return f'<img class="logo" src="assets/logo.png" alt="{SITE_TITLE}">'
+    return ""
 
 
 def render_social_links() -> str:
@@ -152,17 +205,38 @@ def render_comments(p: dict) -> str:
 <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>'''
 
 
-def render_index(products: list[dict]) -> str:
-    cards = "\n".join(
-        f'''<a class="card" href="produtos/{p['id']}.html">
+def _slug(texto: str) -> str:
+    import unicodedata
+
+    sem_acento = unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-z0-9]+", "-", sem_acento.lower()).strip("-")
+
+
+def render_card(p: dict) -> str:
+    return f'''<a class="card" href="produtos/{p['id']}.html">
   <img src="{p['foto_web']}" alt="{html.escape(p['titulo'])}" loading="lazy">
   <div class="info">
     <p class="titulo">{html.escape(p['titulo'])}</p>
     {f'<p class="preco">{html.escape(p["preco"])}</p>' if p.get('preco') else ''}
+    <span class="cta">{CTA_TEXTO}</span>
   </div>
 </a>'''
-        for p in products
+
+
+def render_index(products: list[dict]) -> str:
+    grouped = group_by_category(products)
+
+    nav = "\n".join(f'<a href="#{_slug(cat)}">{html.escape(cat)}</a>' for cat, _ in grouped)
+    sections = "\n".join(
+        f'''<section class="categoria" id="{_slug(cat)}">
+  <h2>{html.escape(cat)}</h2>
+  <div class="grid">
+    {"".join(render_card(p) for p in items)}
+  </div>
+</section>'''
+        for cat, items in grouped
     )
+
     return f"""<!doctype html>
 <html lang="pt-br">
 <head>
@@ -174,13 +248,15 @@ def render_index(products: list[dict]) -> str:
 </head>
 <body>
 <header>
+{render_logo()}
 <h1>{SITE_TITLE}</h1>
-<p>Achadinhos da Amazon selecionados — clique pra ver o produto e o link direto pra comprar.</p>
+<p class="tagline">Achadinhos da Amazon selecionados — clique pra ver o produto e o link direto pra comprar.</p>
 {render_social_links()}
 </header>
-<div class="grid">
-{cards}
-</div>
+<nav class="categorias">
+{nav}
+</nav>
+{sections}
 <p class="disclosure">{DISCLOSURE}</p>
 </body>
 </html>
@@ -204,8 +280,8 @@ def render_product_page(p: dict) -> str:
 <img class="produto-foto" src="../{p['foto_web']}" alt="{html.escape(p['titulo'])}">
 {preco_html}
 <div class="btn-row">
-<a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">Ver oferta na Amazon</a>
-{f'<a class="btn-comprar shopee" href="{p["link_shopee"]}" rel="nofollow sponsored noopener" target="_blank">Ver oferta na Shopee</a>' if p.get('link_shopee') else ''}
+<a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Amazon)</a>
+{f'<a class="btn-comprar shopee" href="{p["link_shopee"]}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Shopee)</a>' if p.get('link_shopee') else ''}
 </div>
 <p>Segue a gente pra mais achadinhos:</p>
 {render_social_links()}
