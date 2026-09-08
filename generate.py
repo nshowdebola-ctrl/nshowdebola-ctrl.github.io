@@ -289,14 +289,17 @@ def render_index(products: list[dict]) -> str:
 {render_logo()}
 <h1{' class="sr-only"' if LOGO_PATH.exists() else ''}>{SITE_TITLE}</h1>
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
-{render_social_links()}
 </header>
 {render_store_nav(products)}
 <nav class="categorias">
 {nav}
 </nav>
 {sections}
+<footer>
+<p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
+{render_social_links()}
 <p class="disclosure">{DISCLOSURE}</p>
+</footer>
 </body>
 </html>
 """
@@ -322,10 +325,12 @@ def render_product_page(p: dict) -> str:
 <a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Amazon)</a>
 {f'<a class="btn-comprar shopee" href="{p["link_shopee"]}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Shopee)</a>' if p.get('link_shopee') else ''}
 </div>
-<p>Segue a gente pra mais achadinhos:</p>
-{render_social_links()}
 {render_comments(p)}
+<footer>
+<p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
+{render_social_links()}
 <p class="disclosure">{DISCLOSURE}</p>
+</footer>
 </body>
 </html>
 """
