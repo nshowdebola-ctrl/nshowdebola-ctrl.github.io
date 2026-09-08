@@ -126,19 +126,19 @@ DISCLOSURE = (
     "através dos links de produtos, sem nenhum custo extra para você."
 )
 
+# Fundo claro fixo (não segue tema claro/escuro do sistema), inspirado no
+# visual do achadinhosexpress.com.br: página em cinza bem claro, cards
+# brancos com sombra suave, menu de lojas no topo.
 BASE_CSS = """
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --accent: #ff9900;
   --accent-shopee: #ee4d2d;
-  --bg: #fafafa;
+  --bg: #f3f4f6;
   --fg: #1a1a1a;
   --card-bg: #ffffff;
-  --border: #e2e2e2;
-  --muted: #777;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #121212; --fg: #eee; --card-bg: #1c1c1c; --border: #333; --muted: #999; }
+  --border: #e5e7eb;
+  --muted: #6b7280;
 }
 body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
   background: var(--bg); color: var(--fg); }
@@ -148,23 +148,31 @@ header h1 { font-size: 1.8rem; margin: 4px 0; }
 header h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap; }
 header p.tagline { color: var(--muted); margin-top: 0; }
-nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0; }
+nav.lojas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0 8px;
+  background: var(--card-bg); border-radius: 12px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+nav.lojas button { font: inherit; cursor: pointer; background: transparent; border: 1px solid var(--border);
+  color: inherit; font-size: 0.85rem; font-weight: 700; padding: 8px 16px; border-radius: 20px; }
+nav.lojas button:hover { border-color: var(--accent); }
+nav.lojas button.active { background: var(--accent); border-color: var(--accent); color: #111; }
+nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 20px; }
 nav.categorias a { background: var(--card-bg); border: 1px solid var(--border); color: inherit;
-  text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 6px 14px; border-radius: 20px; }
+  text-decoration: none; font-size: 0.8rem; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
 nav.categorias a:hover { border-color: var(--accent); color: var(--accent); }
 section.categoria { margin: 32px 0; }
 section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); padding-left: 10px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin: 16px 0; }
 .card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none;
-  color: inherit; display: flex; flex-direction: column; background: var(--card-bg); transition: transform .15s; }
-.card:hover { transform: translateY(-3px); border-color: var(--accent); }
+  color: inherit; display: flex; flex-direction: column; background: var(--card-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
 .card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .card .info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
 .card .titulo { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; flex: 1; }
 .card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
 .card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
   font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
-.produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto; }
+.produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
 .btn-comprar { display: inline-block; background: var(--accent); color: #111; font-weight: 700;
   padding: 12px 24px; border-radius: 8px; text-decoration: none; }
@@ -175,6 +183,23 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 .social a { display: inline-block; background: #222; color: #fff; text-decoration: none;
   font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 20px; }
 .social a:hover { background: #444; }
+"""
+
+STORE_FILTER_JS = """
+function filtrarLoja(loja, btn) {
+  document.querySelectorAll('nav.lojas button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(function (card) {
+    var lojas = (card.dataset.loja || '').split(' ');
+    card.style.display = (loja === 'todos' || lojas.indexOf(loja) !== -1) ? '' : 'none';
+  });
+  document.querySelectorAll('section.categoria').forEach(function (sec) {
+    var temVisivel = Array.prototype.some.call(
+      sec.querySelectorAll('.card'), function (c) { return c.style.display !== 'none'; }
+    );
+    sec.style.display = temVisivel ? '' : 'none';
+  });
+}
 """
 
 
@@ -215,7 +240,8 @@ def _slug(texto: str) -> str:
 
 
 def render_card(p: dict) -> str:
-    return f'''<a class="card" href="produtos/{p['id']}.html">
+    lojas = "amazon" + (" shopee" if p.get("link_shopee") else "")
+    return f'''<a class="card" data-loja="{lojas}" href="produtos/{p['id']}.html">
   <img src="{p['foto_web']}" alt="{html.escape(p['titulo'])}" loading="lazy">
   <div class="info">
     <p class="titulo">{html.escape(p['titulo'])}</p>
@@ -223,6 +249,15 @@ def render_card(p: dict) -> str:
     <span class="cta">{CTA_TEXTO}</span>
   </div>
 </a>'''
+
+
+def render_store_nav(products: list[dict]) -> str:
+    tem_shopee = any(p.get("link_shopee") for p in products)
+    botoes = ['<button class="active" onclick="filtrarLoja(\'todos\', this)">Todos</button>',
+              '<button onclick="filtrarLoja(\'amazon\', this)">Amazon</button>']
+    if tem_shopee:
+        botoes.append('<button onclick="filtrarLoja(\'shopee\', this)">Shopee</button>')
+    return f'<nav class="lojas">\n{"".join(botoes)}\n</nav>'
 
 
 def render_index(products: list[dict]) -> str:
@@ -247,6 +282,7 @@ def render_index(products: list[dict]) -> str:
 <title>{SITE_TITLE} — achadinhos da Amazon com preço bom</title>
 <meta name="description" content="Seleção de achadinhos da Amazon: produtos úteis e baratos, com link direto pra comprar.">
 <style>{BASE_CSS}</style>
+<script>{STORE_FILTER_JS}</script>
 </head>
 <body>
 <header>
@@ -255,6 +291,7 @@ def render_index(products: list[dict]) -> str:
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
 {render_social_links()}
 </header>
+{render_store_nav(products)}
 <nav class="categorias">
 {nav}
 </nav>

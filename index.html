@@ -7,17 +7,14 @@
 <meta name="description" content="Seleção de achadinhos da Amazon: produtos úteis e baratos, com link direto pra comprar.">
 <style>
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --accent: #ff9900;
   --accent-shopee: #ee4d2d;
-  --bg: #fafafa;
+  --bg: #f3f4f6;
   --fg: #1a1a1a;
   --card-bg: #ffffff;
-  --border: #e2e2e2;
-  --muted: #777;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #121212; --fg: #eee; --card-bg: #1c1c1c; --border: #333; --muted: #999; }
+  --border: #e5e7eb;
+  --muted: #6b7280;
 }
 body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
   background: var(--bg); color: var(--fg); }
@@ -27,23 +24,31 @@ header h1 { font-size: 1.8rem; margin: 4px 0; }
 header h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap; }
 header p.tagline { color: var(--muted); margin-top: 0; }
-nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0; }
+nav.lojas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0 8px;
+  background: var(--card-bg); border-radius: 12px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+nav.lojas button { font: inherit; cursor: pointer; background: transparent; border: 1px solid var(--border);
+  color: inherit; font-size: 0.85rem; font-weight: 700; padding: 8px 16px; border-radius: 20px; }
+nav.lojas button:hover { border-color: var(--accent); }
+nav.lojas button.active { background: var(--accent); border-color: var(--accent); color: #111; }
+nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 20px; }
 nav.categorias a { background: var(--card-bg); border: 1px solid var(--border); color: inherit;
-  text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 6px 14px; border-radius: 20px; }
+  text-decoration: none; font-size: 0.8rem; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
 nav.categorias a:hover { border-color: var(--accent); color: var(--accent); }
 section.categoria { margin: 32px 0; }
 section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); padding-left: 10px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin: 16px 0; }
 .card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none;
-  color: inherit; display: flex; flex-direction: column; background: var(--card-bg); transition: transform .15s; }
-.card:hover { transform: translateY(-3px); border-color: var(--accent); }
+  color: inherit; display: flex; flex-direction: column; background: var(--card-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
 .card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .card .info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
 .card .titulo { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; flex: 1; }
 .card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
 .card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
   font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
-.produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto; }
+.produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
 .btn-comprar { display: inline-block; background: var(--accent); color: #111; font-weight: 700;
   padding: 12px 24px; border-radius: 8px; text-decoration: none; }
@@ -55,6 +60,22 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
   font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 20px; }
 .social a:hover { background: #444; }
 </style>
+<script>
+function filtrarLoja(loja, btn) {
+  document.querySelectorAll('nav.lojas button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(function (card) {
+    var lojas = (card.dataset.loja || '').split(' ');
+    card.style.display = (loja === 'todos' || lojas.indexOf(loja) !== -1) ? '' : 'none';
+  });
+  document.querySelectorAll('section.categoria').forEach(function (sec) {
+    var temVisivel = Array.prototype.some.call(
+      sec.querySelectorAll('.card'), function (c) { return c.style.display !== 'none'; }
+    );
+    sec.style.display = temVisivel ? '' : 'none';
+  });
+}
+</script>
 </head>
 <body>
 <header>
@@ -66,6 +87,9 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <a href="https://www.youtube.com/@NoticiasShowdeBola" target="_blank" rel="noopener">YouTube · Notícias Show de Bola</a>
 </div>
 </header>
+<nav class="lojas">
+<button class="active" onclick="filtrarLoja('todos', this)">Todos</button><button onclick="filtrarLoja('amazon', this)">Amazon</button>
+</nav>
 <nav class="categorias">
 <a href="#eletronicos">Eletrônicos</a>
 <a href="#casa-utilidades">Casa &amp; Utilidades</a>
@@ -77,35 +101,35 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <section class="categoria" id="eletronicos">
   <h2>Eletrônicos</h2>
   <div class="grid">
-    <a class="card" href="produtos/soundcore-p30i.html">
+    <a class="card" data-loja="amazon" href="produtos/soundcore-p30i.html">
   <img src="assets/photos/soundcore-p30i.jpg" alt="Soundcore P30i da Anker, ANC Fone de Ouvido Bluetooth 5.4" loading="lazy">
   <div class="info">
     <p class="titulo">Soundcore P30i da Anker, ANC Fone de Ouvido Bluetooth 5.4</p>
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
-</a><a class="card" href="produtos/kindle-16gb.html">
+</a><a class="card" data-loja="amazon" href="produtos/kindle-16gb.html">
   <img src="assets/photos/kindle-16gb.jpg" alt="Kindle 16 GB (Geração mais recente) - Leve e compacto, com tela antirreflexo, trocas de página mais rápidas, luz frontal ajustável e bateria de longa duração - Cor Preta" loading="lazy">
   <div class="info">
     <p class="titulo">Kindle 16 GB (Geração mais recente) - Leve e compacto, com tela antirreflexo, trocas de página mais rápidas, luz frontal ajustável e bateria de longa duração - Cor Preta</p>
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
-</a><a class="card" href="produtos/fire-tv-stick-hd.html">
+</a><a class="card" data-loja="amazon" href="produtos/fire-tv-stick-hd.html">
   <img src="assets/photos/fire-tv-stick-hd.jpg" alt="Amazon Fire TV Stick HD, Controle Remoto por Voz com Alexa" loading="lazy">
   <div class="info">
     <p class="titulo">Amazon Fire TV Stick HD, Controle Remoto por Voz com Alexa</p>
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
-</a><a class="card" href="produtos/echo-dot.html">
+</a><a class="card" data-loja="amazon" href="produtos/echo-dot.html">
   <img src="assets/photos/echo-dot.jpg" alt="Echo Dot (Geração mais recente) | Smart speaker com Alexa" loading="lazy">
   <div class="info">
     <p class="titulo">Echo Dot (Geração mais recente) | Smart speaker com Alexa</p>
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
-</a><a class="card" href="produtos/ps5-slim-digital.html">
+</a><a class="card" data-loja="amazon" href="produtos/ps5-slim-digital.html">
   <img src="assets/photos/ps5-slim-digital.jpg" alt="PlayStation 5 Slim Digital 825GB – Pacote ASTRO BOT e Gran Turismo 7" loading="lazy">
   <div class="info">
     <p class="titulo">PlayStation 5 Slim Digital 825GB – Pacote ASTRO BOT e Gran Turismo 7</p>
@@ -118,21 +142,21 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <section class="categoria" id="casa-utilidades">
   <h2>Casa &amp; Utilidades</h2>
   <div class="grid">
-    <a class="card" href="produtos/compressor-mibee.html">
+    <a class="card" data-loja="amazon" href="produtos/compressor-mibee.html">
   <img src="assets/photos/compressor-mibee.jpg" alt="Compressor de Ar Portátil com Inflador de Pneu Mibee" loading="lazy">
   <div class="info">
     <p class="titulo">Compressor de Ar Portátil com Inflador de Pneu Mibee</p>
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
-</a><a class="card" href="produtos/vollo-bomba.html">
+</a><a class="card" data-loja="amazon" href="produtos/vollo-bomba.html">
   <img src="assets/photos/vollo-bomba.jpg" alt="Vollo Bomba de Inflar Dupla Ação" loading="lazy">
   <div class="info">
     <p class="titulo">Vollo Bomba de Inflar Dupla Ação</p>
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
-</a><a class="card" href="produtos/pilha-elgin-aaa.html">
+</a><a class="card" data-loja="amazon" href="produtos/pilha-elgin-aaa.html">
   <img src="assets/photos/pilha-elgin-aaa.jpg" alt="Pilha Alcalina AAA com 16 unidades Elgin Palito" loading="lazy">
   <div class="info">
     <p class="titulo">Pilha Alcalina AAA com 16 unidades Elgin Palito</p>
@@ -145,7 +169,7 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <section class="categoria" id="beleza">
   <h2>Beleza</h2>
   <div class="grid">
-    <a class="card" href="produtos/oleo-loreal-elseve.html">
+    <a class="card" data-loja="amazon" href="produtos/oleo-loreal-elseve.html">
   <img src="assets/photos/oleo-loreal-elseve.jpg" alt="L&#x27;Oréal Paris Elseve Óleo Extraordinário Finalizador Capilar" loading="lazy">
   <div class="info">
     <p class="titulo">L&#x27;Oréal Paris Elseve Óleo Extraordinário Finalizador Capilar</p>
@@ -158,7 +182,7 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <section class="categoria" id="livros">
   <h2>Livros</h2>
   <div class="grid">
-    <a class="card" href="produtos/livro-verity.html">
+    <a class="card" data-loja="amazon" href="produtos/livro-verity.html">
   <img src="assets/photos/livro-verity.jpg" alt="Verity - Colleen Hoover" loading="lazy">
   <div class="info">
     <p class="titulo">Verity - Colleen Hoover</p>
@@ -171,7 +195,7 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <section class="categoria" id="esportes-brinquedos">
   <h2>Esportes &amp; Brinquedos</h2>
   <div class="grid">
-    <a class="card" href="produtos/mini-bola-trionda.html">
+    <a class="card" data-loja="amazon" href="produtos/mini-bola-trionda.html">
   <img src="assets/photos/mini-bola-trionda.jpg" alt="Mini Bola Trionda da Copa do Mundo da FIFA 26™ Adidas" loading="lazy">
   <div class="info">
     <p class="titulo">Mini Bola Trionda da Copa do Mundo da FIFA 26™ Adidas</p>
@@ -184,7 +208,7 @@ a.voltar { display: inline-block; margin-bottom: 16px; }
 <section class="categoria" id="ofertas">
   <h2>Ofertas</h2>
   <div class="grid">
-    <a class="card" href="produtos/oferta-9-9.html">
+    <a class="card" data-loja="amazon" href="produtos/oferta-9-9.html">
   <img src="assets/photos/oferta-9-9.jpg" alt="Ofertas 9.9 da Amazon: milhoes em cupons!" loading="lazy">
   <div class="info">
     <p class="titulo">Ofertas 9.9 da Amazon: milhoes em cupons!</p>
