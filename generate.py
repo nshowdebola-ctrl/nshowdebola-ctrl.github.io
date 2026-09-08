@@ -142,12 +142,17 @@ BASE_CSS = """
 }
 body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
   background: var(--bg); color: var(--fg); }
-header { text-align: center; padding: 12px 0 4px; }
-header img.logo { width: min(220px, 60vw); height: auto; margin-bottom: 4px; }
-header h1 { font-size: 1.8rem; margin: 4px 0; }
-header h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
+header.topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 12px; padding: 12px 0; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.brand .logo-sm { width: 40px; height: 40px; object-fit: contain; }
+.brand .brand-name { font-weight: 800; font-size: 1.1rem; }
+nav.topnav { display: flex; align-items: center; gap: 20px; }
+nav.topnav a { color: inherit; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+nav.topnav a:hover { color: var(--accent); }
+h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap; }
-header p.tagline { color: var(--muted); margin-top: 0; }
+.tagline { color: var(--muted); text-align: center; margin: 12px 0; }
 nav.lojas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0 8px;
   background: var(--card-bg); border-radius: 12px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 nav.lojas button { font: inherit; cursor: pointer; background: transparent; border: 1px solid var(--border);
@@ -203,10 +208,20 @@ function filtrarLoja(loja, btn) {
 """
 
 
-def render_logo() -> str:
-    if LOGO_PATH.exists():
-        return f'<img class="logo" src="assets/logo.png" alt="{SITE_TITLE}">'
-    return ""
+def render_topbar(base_path: str, tem_shopee: bool) -> str:
+    logo_html = f'<img class="logo-sm" src="{base_path}assets/logo.png" alt="{SITE_TITLE}">' if LOGO_PATH.exists() else ""
+    shopee_link = f'<a href="{base_path}index.html#vitrine">Shopee</a>' if tem_shopee else ""
+    return f'''<header class="topbar">
+  <a class="brand" href="{base_path}index.html">
+    {logo_html}
+    <span class="brand-name">{SITE_TITLE}</span>
+  </a>
+  <nav class="topnav">
+    <a href="{base_path}index.html#vitrine">Amazon</a>
+    {shopee_link}
+    <a href="{base_path}sobre.html">Sobre</a>
+  </nav>
+</header>'''
 
 
 def render_social_links() -> str:
@@ -257,10 +272,11 @@ def render_store_nav(products: list[dict]) -> str:
               '<button onclick="filtrarLoja(\'amazon\', this)">Amazon</button>']
     if tem_shopee:
         botoes.append('<button onclick="filtrarLoja(\'shopee\', this)">Shopee</button>')
-    return f'<nav class="lojas">\n{"".join(botoes)}\n</nav>'
+    return f'<nav class="lojas" id="vitrine">\n{"".join(botoes)}\n</nav>'
 
 
 def render_index(products: list[dict]) -> str:
+    tem_shopee = any(p.get("link_shopee") for p in products)
     grouped = group_by_category(products)
 
     nav = "\n".join(f'<a href="#{_slug(cat)}">{html.escape(cat)}</a>' for cat, _ in grouped)
@@ -285,11 +301,9 @@ def render_index(products: list[dict]) -> str:
 <script>{STORE_FILTER_JS}</script>
 </head>
 <body>
-<header>
-{render_logo()}
-<h1{' class="sr-only"' if LOGO_PATH.exists() else ''}>{SITE_TITLE}</h1>
+{render_topbar("", tem_shopee)}
+<h1 class="sr-only">{SITE_TITLE}</h1>
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
-</header>
 {render_store_nav(products)}
 <nav class="categorias">
 {nav}
@@ -305,7 +319,7 @@ def render_index(products: list[dict]) -> str:
 """
 
 
-def render_product_page(p: dict) -> str:
+def render_product_page(p: dict, tem_shopee: bool) -> str:
     preco_html = f'<p class="preco" style="font-size:1.3rem;color:#c0392b;font-weight:700;">{html.escape(p["preco"])}</p>' if p.get("preco") else ""
     return f"""<!doctype html>
 <html lang="pt-br">
@@ -317,6 +331,7 @@ def render_product_page(p: dict) -> str:
 <style>{BASE_CSS}</style>
 </head>
 <body>
+{render_topbar("../", tem_shopee)}
 <a class="voltar" href="../index.html">&larr; Voltar</a>
 <h1>{html.escape(p['titulo'])}</h1>
 <img class="produto-foto" src="../{p['foto_web']}" alt="{html.escape(p['titulo'])}">
@@ -336,9 +351,38 @@ def render_product_page(p: dict) -> str:
 """
 
 
+def render_sobre_page(tem_shopee: bool) -> str:
+    return f"""<!doctype html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sobre — {SITE_TITLE}</title>
+<meta name="description" content="Quem somos e como funciona o {SITE_TITLE}.">
+<style>{BASE_CSS}</style>
+</head>
+<body>
+{render_topbar("", tem_shopee)}
+<a class="voltar" href="index.html">&larr; Voltar</a>
+<h1>Sobre o {SITE_TITLE}</h1>
+<p>O {SITE_TITLE} é um site de curadoria: selecionamos achadinhos da Amazon (e, em breve,
+da Shopee) que a gente também divulga no TikTok, e reunimos tudo aqui com o link direto pra
+comprar. Não somos Amazon nem Shopee — as compras são feitas diretamente nos sites das lojas
+parceiras.</p>
+<footer>
+<p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
+{render_social_links()}
+<p class="disclosure">{DISCLOSURE}</p>
+</footer>
+</body>
+</html>
+"""
+
+
 def main():
     tag = _amazon_tag()
     products = collect_posted_products(tag)
+    tem_shopee = any(p.get("link_shopee") for p in products)
 
     shutil.rmtree(PRODUTOS_OUT, ignore_errors=True)
     shutil.rmtree(PHOTOS_OUT, ignore_errors=True)
@@ -347,8 +391,9 @@ def main():
 
     PRODUTOS_OUT.mkdir(parents=True, exist_ok=True)
     (SITE_DIR / "index.html").write_text(render_index(products), encoding="utf-8")
+    (SITE_DIR / "sobre.html").write_text(render_sobre_page(tem_shopee), encoding="utf-8")
     for p in products:
-        (PRODUTOS_OUT / f"{p['id']}.html").write_text(render_product_page(p), encoding="utf-8")
+        (PRODUTOS_OUT / f"{p['id']}.html").write_text(render_product_page(p, tem_shopee), encoding="utf-8")
 
     (SITE_DIR / ".nojekyll").touch()
 
