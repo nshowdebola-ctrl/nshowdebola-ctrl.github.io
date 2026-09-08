@@ -13,6 +13,10 @@ from pathlib import Path
 AFILIADO_DIR = Path("/home/alex/projetos/afiliado-tiktok")
 CHANNELS_DIR = AFILIADO_DIR / "data" / "channels"
 SITE_DIR = Path(__file__).resolve().parent
+
+# Canais cujos produtos não devem aparecer no blog (o post no TikTok continua
+# normal, só não fica exposto aqui).
+EXCLUDED_CHANNELS = {"alexcunhaccb"}
 PHOTOS_OUT = SITE_DIR / "assets" / "photos"
 PRODUTOS_OUT = SITE_DIR / "produtos"
 
@@ -45,6 +49,8 @@ def _affiliate_link(url: str, tag: str) -> str:
 def collect_posted_products(tag: str) -> list[dict]:
     seen = {}
     for channel_dir in sorted(CHANNELS_DIR.glob("*")):
+        if channel_dir.name in EXCLUDED_CHANNELS:
+            continue
         log = _load_json(channel_dir / "posted_log.json")
         posted_ids = [e["id"] for e in log if e.get("status") == "success"]
         catalog = {p["id"]: p for p in _load_json(channel_dir / "products.json")}
@@ -61,6 +67,10 @@ def collect_posted_products(tag: str) -> list[dict]:
                 "titulo": product["titulo"],
                 "preco": product.get("preco"),
                 "link": _affiliate_link(product["url_amazon"], tag),
+                # Shopee ainda não tem campo no products.json (afiliação pendente
+                # de aprovação) — quando existir, basta adicionar "url_shopee" ao
+                # produto que o botão aparece sozinho, sem mexer aqui.
+                "link_shopee": product.get("url_shopee"),
                 "fotos": [AFILIADO_DIR / foto for foto in product["fotos"]],
             }
     return list(seen.values())
@@ -82,7 +92,6 @@ CUSDIS_APP_ID = "bc04f0f0-fc8f-46cc-83f7-82436325048f"
 
 SOCIAL_LINKS = [
     ("TikTok · @achadinhosmultiuso10", "https://www.tiktok.com/@achadinhosmultiuso10"),
-    ("TikTok · @alexcunhaccb", "https://www.tiktok.com/@alexcunhaccb"),
     ("YouTube · Notícias Show de Bola", "https://www.youtube.com/@NoticiasShowdeBola"),
 ]
 
@@ -107,8 +116,10 @@ header p { color: #777; margin-top: 0; }
 .card .titulo { font-size: 0.95rem; font-weight: 600; margin: 0 0 4px; }
 .card .preco { color: #c0392b; font-weight: 700; }
 .produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
 .btn-comprar { display: inline-block; background: #ff9900; color: #111; font-weight: 700;
-  padding: 12px 24px; border-radius: 8px; text-decoration: none; margin: 16px 0; }
+  padding: 12px 24px; border-radius: 8px; text-decoration: none; }
+.btn-comprar.shopee { background: #ee4d2d; color: #fff; }
 .disclosure { font-size: 0.8rem; color: #888; border-top: 1px solid #ddd; margin-top: 40px; padding-top: 12px; }
 a.voltar { display: inline-block; margin-bottom: 16px; }
 .social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
@@ -192,7 +203,10 @@ def render_product_page(p: dict) -> str:
 <h1>{html.escape(p['titulo'])}</h1>
 <img class="produto-foto" src="../{p['foto_web']}" alt="{html.escape(p['titulo'])}">
 {preco_html}
+<div class="btn-row">
 <a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">Ver oferta na Amazon</a>
+{f'<a class="btn-comprar shopee" href="{p["link_shopee"]}" rel="nofollow sponsored noopener" target="_blank">Ver oferta na Shopee</a>' if p.get('link_shopee') else ''}
+</div>
 <p>Segue a gente pra mais achadinhos:</p>
 {render_social_links()}
 {render_comments(p)}
@@ -205,6 +219,10 @@ def render_product_page(p: dict) -> str:
 def main():
     tag = _amazon_tag()
     products = collect_posted_products(tag)
+
+    shutil.rmtree(PRODUTOS_OUT, ignore_errors=True)
+    shutil.rmtree(PHOTOS_OUT, ignore_errors=True)
+
     copy_photos(products)
 
     PRODUTOS_OUT.mkdir(parents=True, exist_ok=True)
