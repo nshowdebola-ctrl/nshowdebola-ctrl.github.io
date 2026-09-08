@@ -42,16 +42,26 @@ nav.categorias a:hover { border-color: var(--accent); color: var(--accent); }
 section.categoria { margin: 32px 0; }
 section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); padding-left: 10px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin: 16px 0; }
-.card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none;
-  color: inherit; display: flex; flex-direction: column; background: var(--card-bg);
+.card { position: relative; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  text-decoration: none; color: inherit; display: flex; flex-direction: column; background: var(--card-bg);
   box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
 .card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
 .card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.card .badge-desconto { position: absolute; top: 8px; left: 8px; background: #e11d48; color: #fff;
+  font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
 .card .info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
 .card .titulo { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; flex: 1; }
+.card .preco-original { color: var(--muted); text-decoration: line-through; font-size: 0.8rem; margin: 0; }
 .card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
 .card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
   font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
+.oferta-dia { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--card-bg);
+  border: 2px solid #e11d48; border-radius: 12px; padding: 16px; margin: 20px 0; text-decoration: none;
+  color: inherit; box-shadow: 0 2px 8px rgba(225,29,72,.15); }
+.oferta-dia img { width: 110px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.oferta-dia .tag { display: inline-block; background: #e11d48; color: #fff; font-weight: 800;
+  font-size: 0.75rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 6px; }
+.oferta-dia .titulo { font-weight: 700; margin: 0 0 4px; }
 .produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
@@ -97,6 +107,7 @@ function filtrarLoja(loja, btn) {
 </header>
 <h1 class="sr-only">Achadinhos da Web</h1>
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
+
 <nav class="lojas" id="vitrine">
 <button class="active" onclick="filtrarLoja('todos', this)">Todos</button><button onclick="filtrarLoja('amazon', this)">Amazon</button>
 </nav>
@@ -112,37 +123,47 @@ function filtrarLoja(loja, btn) {
   <h2>Eletrônicos</h2>
   <div class="grid">
     <a class="card" data-loja="amazon" href="produtos/soundcore-p30i.html">
+  
   <img src="assets/photos/soundcore-p30i.jpg" alt="Soundcore P30i da Anker, ANC Fone de Ouvido Bluetooth 5.4" loading="lazy">
   <div class="info">
     <p class="titulo">Soundcore P30i da Anker, ANC Fone de Ouvido Bluetooth 5.4</p>
     
+    
     <span class="cta">🛒 Quero esse!</span>
   </div>
 </a><a class="card" data-loja="amazon" href="produtos/kindle-16gb.html">
+  
   <img src="assets/photos/kindle-16gb.jpg" alt="Kindle 16 GB (Geração mais recente) - Leve e compacto, com tela antirreflexo, trocas de página mais rápidas, luz frontal ajustável e bateria de longa duração - Cor Preta" loading="lazy">
   <div class="info">
     <p class="titulo">Kindle 16 GB (Geração mais recente) - Leve e compacto, com tela antirreflexo, trocas de página mais rápidas, luz frontal ajustável e bateria de longa duração - Cor Preta</p>
     
+    
     <span class="cta">🛒 Quero esse!</span>
   </div>
 </a><a class="card" data-loja="amazon" href="produtos/fire-tv-stick-hd.html">
+  
   <img src="assets/photos/fire-tv-stick-hd.jpg" alt="Amazon Fire TV Stick HD, Controle Remoto por Voz com Alexa" loading="lazy">
   <div class="info">
     <p class="titulo">Amazon Fire TV Stick HD, Controle Remoto por Voz com Alexa</p>
     
+    
     <span class="cta">🛒 Quero esse!</span>
   </div>
 </a><a class="card" data-loja="amazon" href="produtos/echo-dot.html">
+  
   <img src="assets/photos/echo-dot.jpg" alt="Echo Dot (Geração mais recente) | Smart speaker com Alexa" loading="lazy">
   <div class="info">
     <p class="titulo">Echo Dot (Geração mais recente) | Smart speaker com Alexa</p>
     
+    
     <span class="cta">🛒 Quero esse!</span>
   </div>
 </a><a class="card" data-loja="amazon" href="produtos/ps5-slim-digital.html">
+  
   <img src="assets/photos/ps5-slim-digital.jpg" alt="PlayStation 5 Slim Digital 825GB – Pacote ASTRO BOT e Gran Turismo 7" loading="lazy">
   <div class="info">
     <p class="titulo">PlayStation 5 Slim Digital 825GB – Pacote ASTRO BOT e Gran Turismo 7</p>
+    
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
@@ -153,23 +174,38 @@ function filtrarLoja(loja, btn) {
   <h2>Casa &amp; Utilidades</h2>
   <div class="grid">
     <a class="card" data-loja="amazon" href="produtos/compressor-mibee.html">
+  
   <img src="assets/photos/compressor-mibee.jpg" alt="Compressor de Ar Portátil com Inflador de Pneu Mibee" loading="lazy">
   <div class="info">
     <p class="titulo">Compressor de Ar Portátil com Inflador de Pneu Mibee</p>
     
+    
     <span class="cta">🛒 Quero esse!</span>
   </div>
 </a><a class="card" data-loja="amazon" href="produtos/vollo-bomba.html">
+  
   <img src="assets/photos/vollo-bomba.jpg" alt="Vollo Bomba de Inflar Dupla Ação" loading="lazy">
   <div class="info">
     <p class="titulo">Vollo Bomba de Inflar Dupla Ação</p>
     
+    
     <span class="cta">🛒 Quero esse!</span>
   </div>
 </a><a class="card" data-loja="amazon" href="produtos/pilha-elgin-aaa.html">
+  
   <img src="assets/photos/pilha-elgin-aaa.jpg" alt="Pilha Alcalina AAA com 16 unidades Elgin Palito" loading="lazy">
   <div class="info">
     <p class="titulo">Pilha Alcalina AAA com 16 unidades Elgin Palito</p>
+    
+    
+    <span class="cta">🛒 Quero esse!</span>
+  </div>
+</a><a class="card" data-loja="amazon" href="produtos/mop-flash-limp.html">
+  
+  <img src="assets/photos/mop-flash-limp.jpg" alt="Flash Limp Mop Giratório Fit, Balde 8 litros" loading="lazy">
+  <div class="info">
+    <p class="titulo">Flash Limp Mop Giratório Fit, Balde 8 litros</p>
+    
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
@@ -180,9 +216,11 @@ function filtrarLoja(loja, btn) {
   <h2>Beleza</h2>
   <div class="grid">
     <a class="card" data-loja="amazon" href="produtos/oleo-loreal-elseve.html">
+  
   <img src="assets/photos/oleo-loreal-elseve.jpg" alt="L&#x27;Oréal Paris Elseve Óleo Extraordinário Finalizador Capilar" loading="lazy">
   <div class="info">
     <p class="titulo">L&#x27;Oréal Paris Elseve Óleo Extraordinário Finalizador Capilar</p>
+    
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
@@ -193,9 +231,11 @@ function filtrarLoja(loja, btn) {
   <h2>Livros</h2>
   <div class="grid">
     <a class="card" data-loja="amazon" href="produtos/livro-verity.html">
+  
   <img src="assets/photos/livro-verity.jpg" alt="Verity - Colleen Hoover" loading="lazy">
   <div class="info">
     <p class="titulo">Verity - Colleen Hoover</p>
+    
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
@@ -206,9 +246,11 @@ function filtrarLoja(loja, btn) {
   <h2>Esportes &amp; Brinquedos</h2>
   <div class="grid">
     <a class="card" data-loja="amazon" href="produtos/mini-bola-trionda.html">
+  
   <img src="assets/photos/mini-bola-trionda.jpg" alt="Mini Bola Trionda da Copa do Mundo da FIFA 26™ Adidas" loading="lazy">
   <div class="info">
     <p class="titulo">Mini Bola Trionda da Copa do Mundo da FIFA 26™ Adidas</p>
+    
     
     <span class="cta">🛒 Quero esse!</span>
   </div>
@@ -219,9 +261,11 @@ function filtrarLoja(loja, btn) {
   <h2>Ofertas</h2>
   <div class="grid">
     <a class="card" data-loja="amazon" href="produtos/oferta-9-9.html">
+  
   <img src="assets/photos/oferta-9-9.jpg" alt="Ofertas 9.9 da Amazon: milhoes em cupons!" loading="lazy">
   <div class="info">
     <p class="titulo">Ofertas 9.9 da Amazon: milhoes em cupons!</p>
+    
     
     <span class="cta">🛒 Quero esse!</span>
   </div>

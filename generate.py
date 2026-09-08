@@ -50,6 +50,23 @@ def _amazon_tag() -> str:
     return match.group(1).strip() if match else ""
 
 
+def _preco_num(preco: str | None) -> float | None:
+    if not preco:
+        return None
+    digits = re.sub(r"[^\d,\.]", "", preco).replace(".", "").replace(",", ".")
+    try:
+        return float(digits)
+    except ValueError:
+        return None
+
+
+def _desconto_pct(preco: str | None, preco_original: str | None) -> int | None:
+    atual, original = _preco_num(preco), _preco_num(preco_original)
+    if not atual or not original or original <= atual:
+        return None
+    return round((1 - atual / original) * 100)
+
+
 def _affiliate_link(url: str, tag: str) -> str:
     from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
@@ -60,25 +77,35 @@ def _affiliate_link(url: str, tag: str) -> str:
 
 
 def collect_posted_products(tag: str) -> list[dict]:
+    """Reúne o catálogo de todos os canais não-excluídos.
+
+    Antes só listava produtos já postados no TikTok (status "success" no
+    posted_log.json). Agora lista qualquer produto cadastrado — o blog não
+    depende mais do ritmo de postagem do TikTok pra crescer (decisão do
+    usuário em 2026-09-08).
+    """
+    from datetime import date
+
+    today = date.today().isoformat()
     seen = {}
     for channel_dir in sorted(CHANNELS_DIR.glob("*")):
         if channel_dir.name in EXCLUDED_CHANNELS:
             continue
-        log = _load_json(channel_dir / "posted_log.json")
-        posted_ids = [e["id"] for e in log if e.get("status") == "success"]
-        catalog = {p["id"]: p for p in _load_json(channel_dir / "products.json")}
-        catalog.update({p["id"]: p for p in _load_json(channel_dir / "promocoes.json")})
+        catalog_items = _load_json(channel_dir / "products.json") + _load_json(channel_dir / "promocoes.json")
 
-        for product_id in posted_ids:
+        for product in catalog_items:
+            product_id = product["id"]
             if product_id in seen:
                 continue
-            product = catalog.get(product_id)
-            if not product:
+            valido_ate = product.get("valido_ate")
+            if valido_ate and today > valido_ate:
                 continue
             seen[product_id] = {
                 "id": product["id"],
                 "titulo": product["titulo"],
                 "preco": product.get("preco"),
+                "preco_original": product.get("preco_original"),
+                "desconto_pct": _desconto_pct(product.get("preco"), product.get("preco_original")),
                 "categoria": product.get("categoria", "Outros"),
                 "link": _affiliate_link(product["url_amazon"], tag),
                 # Shopee ainda não tem campo no products.json (afiliação pendente
@@ -166,16 +193,26 @@ nav.categorias a:hover { border-color: var(--accent); color: var(--accent); }
 section.categoria { margin: 32px 0; }
 section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); padding-left: 10px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin: 16px 0; }
-.card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; text-decoration: none;
-  color: inherit; display: flex; flex-direction: column; background: var(--card-bg);
+.card { position: relative; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  text-decoration: none; color: inherit; display: flex; flex-direction: column; background: var(--card-bg);
   box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
 .card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
 .card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.card .badge-desconto { position: absolute; top: 8px; left: 8px; background: #e11d48; color: #fff;
+  font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
 .card .info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
 .card .titulo { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; flex: 1; }
+.card .preco-original { color: var(--muted); text-decoration: line-through; font-size: 0.8rem; margin: 0; }
 .card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
 .card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
   font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
+.oferta-dia { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--card-bg);
+  border: 2px solid #e11d48; border-radius: 12px; padding: 16px; margin: 20px 0; text-decoration: none;
+  color: inherit; box-shadow: 0 2px 8px rgba(225,29,72,.15); }
+.oferta-dia img { width: 110px; height: 110px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+.oferta-dia .tag { display: inline-block; background: #e11d48; color: #fff; font-weight: 800;
+  font-size: 0.75rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 6px; }
+.oferta-dia .titulo { font-weight: 700; margin: 0 0 4px; }
 .produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
@@ -257,12 +294,34 @@ def _slug(texto: str) -> str:
 
 def render_card(p: dict) -> str:
     lojas = "amazon" + (" shopee" if p.get("link_shopee") else "")
+    badge = f'<span class="badge-desconto">-{p["desconto_pct"]}%</span>' if p.get("desconto_pct") else ""
+    preco_original_html = (
+        f'<p class="preco-original">{html.escape(p["preco_original"])}</p>' if p.get("desconto_pct") else ""
+    )
     return f'''<a class="card" data-loja="{lojas}" href="produtos/{p['id']}.html">
+  {badge}
   <img src="{p['foto_web']}" alt="{html.escape(p['titulo'])}" loading="lazy">
   <div class="info">
     <p class="titulo">{html.escape(p['titulo'])}</p>
+    {preco_original_html}
     {f'<p class="preco">{html.escape(p["preco"])}</p>' if p.get('preco') else ''}
     <span class="cta">{CTA_TEXTO}</span>
+  </div>
+</a>'''
+
+
+def render_oferta_do_dia(products: list[dict]) -> str:
+    candidatos = [p for p in products if p.get("desconto_pct")]
+    if not candidatos:
+        return ""
+    melhor = max(candidatos, key=lambda p: p["desconto_pct"])
+    return f'''<a class="oferta-dia" href="produtos/{melhor['id']}.html">
+  <img src="{melhor['foto_web']}" alt="{html.escape(melhor['titulo'])}">
+  <div>
+    <span class="tag">🔥 Oferta do dia · -{melhor['desconto_pct']}%</span>
+    <p class="titulo">{html.escape(melhor['titulo'])}</p>
+    <p class="preco-original">{html.escape(melhor['preco_original'])}</p>
+    <p class="preco" style="font-size:1.1rem;">{html.escape(melhor['preco'])}</p>
   </div>
 </a>'''
 
@@ -305,6 +364,7 @@ def render_index(products: list[dict]) -> str:
 {render_topbar("", tem_shopee)}
 <h1 class="sr-only">{SITE_TITLE}</h1>
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
+{render_oferta_do_dia(products)}
 {render_store_nav(products)}
 <nav class="categorias">
 {nav}
@@ -321,6 +381,11 @@ def render_index(products: list[dict]) -> str:
 
 
 def render_product_page(p: dict, tem_shopee: bool) -> str:
+    badge_html = f'<p><span class="badge-desconto" style="position:static;">-{p["desconto_pct"]}% OFF</span></p>' if p.get("desconto_pct") else ""
+    preco_original_html = (
+        f'<p class="preco-original" style="font-size:1rem;">{html.escape(p["preco_original"])}</p>'
+        if p.get("desconto_pct") else ""
+    )
     preco_html = f'<p class="preco" style="font-size:1.3rem;color:#c0392b;font-weight:700;">{html.escape(p["preco"])}</p>' if p.get("preco") else ""
     return f"""<!doctype html>
 <html lang="pt-br">
@@ -336,6 +401,8 @@ def render_product_page(p: dict, tem_shopee: bool) -> str:
 <a class="voltar" href="../index.html">&larr; Voltar</a>
 <h1>{html.escape(p['titulo'])}</h1>
 <img class="produto-foto" src="../{p['foto_web']}" alt="{html.escape(p['titulo'])}">
+{badge_html}
+{preco_original_html}
 {preco_html}
 <div class="btn-row">
 <a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Amazon)</a>
