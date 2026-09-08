@@ -106,6 +106,7 @@ def collect_posted_products(tag: str) -> list[dict]:
                 "preco": product.get("preco"),
                 "preco_original": product.get("preco_original"),
                 "desconto_pct": _desconto_pct(product.get("preco"), product.get("preco_original")),
+                "destaque": bool(product.get("destaque")),
                 "categoria": product.get("categoria", "Outros"),
                 "link": _affiliate_link(product["url_amazon"], tag),
                 # Shopee ainda não tem campo no products.json (afiliação pendente
@@ -294,7 +295,12 @@ def _slug(texto: str) -> str:
 
 def render_card(p: dict) -> str:
     lojas = "amazon" + (" shopee" if p.get("link_shopee") else "")
-    badge = f'<span class="badge-desconto">-{p["desconto_pct"]}%</span>' if p.get("desconto_pct") else ""
+    if p.get("desconto_pct"):
+        badge = f'<span class="badge-desconto">-{p["desconto_pct"]}%</span>'
+    elif p.get("destaque"):
+        badge = '<span class="badge-desconto">Oferta</span>'
+    else:
+        badge = ""
     preco_original_html = (
         f'<p class="preco-original">{html.escape(p["preco_original"])}</p>' if p.get("desconto_pct") else ""
     )
@@ -311,16 +317,25 @@ def render_card(p: dict) -> str:
 
 
 def render_oferta_do_dia(products: list[dict]) -> str:
-    candidatos = [p for p in products if p.get("desconto_pct")]
-    if not candidatos:
-        return ""
-    melhor = max(candidatos, key=lambda p: p["desconto_pct"])
+    com_desconto = [p for p in products if p.get("desconto_pct")]
+    if com_desconto:
+        melhor = max(com_desconto, key=lambda p: p["desconto_pct"])
+        tag = f"🔥 Oferta do dia · -{melhor['desconto_pct']}%"
+        preco_original_html = f'<p class="preco-original">{html.escape(melhor["preco_original"])}</p>'
+    else:
+        destaques = [p for p in products if p.get("destaque") and p.get("preco")]
+        if not destaques:
+            return ""
+        melhor = min(destaques, key=lambda p: _preco_num(p["preco"]) or float("inf"))
+        tag = "🔥 Oferta · melhor preço"
+        preco_original_html = ""
+
     return f'''<a class="oferta-dia" href="produtos/{melhor['id']}.html">
   <img src="{melhor['foto_web']}" alt="{html.escape(melhor['titulo'])}">
   <div>
-    <span class="tag">🔥 Oferta do dia · -{melhor['desconto_pct']}%</span>
+    <span class="tag">{tag}</span>
     <p class="titulo">{html.escape(melhor['titulo'])}</p>
-    <p class="preco-original">{html.escape(melhor['preco_original'])}</p>
+    {preco_original_html}
     <p class="preco" style="font-size:1.1rem;">{html.escape(melhor['preco'])}</p>
   </div>
 </a>'''
@@ -381,7 +396,12 @@ def render_index(products: list[dict]) -> str:
 
 
 def render_product_page(p: dict, tem_shopee: bool) -> str:
-    badge_html = f'<p><span class="badge-desconto" style="position:static;">-{p["desconto_pct"]}% OFF</span></p>' if p.get("desconto_pct") else ""
+    if p.get("desconto_pct"):
+        badge_html = f'<p><span class="badge-desconto" style="position:static;">-{p["desconto_pct"]}% OFF</span></p>'
+    elif p.get("destaque"):
+        badge_html = '<p><span class="badge-desconto" style="position:static;">Oferta</span></p>'
+    else:
+        badge_html = ""
     preco_original_html = (
         f'<p class="preco-original" style="font-size:1rem;">{html.escape(p["preco_original"])}</p>'
         if p.get("desconto_pct") else ""
