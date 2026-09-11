@@ -115,7 +115,7 @@ function iniciarCarrosselOfertas() {
   var i = 0;
   setInterval(function () {
     i = (i + 1) % cards.length;
-    cards[i].scrollIntoView({behavior: 'smooth', inline: 'start', block: 'nearest'});
+    el.scrollTo({left: cards[i].offsetLeft, behavior: 'smooth'});
   }, 4000);
 }
 document.addEventListener('DOMContentLoaded', iniciarCarrosselOfertas);
