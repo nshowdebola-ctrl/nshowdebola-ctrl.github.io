@@ -108,10 +108,7 @@ def collect_posted_products(tag: str) -> list[dict]:
                 "desconto_pct": _desconto_pct(product.get("preco"), product.get("preco_original")),
                 "destaque": bool(product.get("destaque")),
                 "categoria": product.get("categoria", "Outros"),
-                "link": _affiliate_link(product["url_amazon"], tag),
-                # Shopee ainda não tem campo no products.json (afiliação pendente
-                # de aprovação) — quando existir, basta adicionar "url_shopee" ao
-                # produto que o botão aparece sozinho, sem mexer aqui.
+                "link": _affiliate_link(product["url_amazon"], tag) if product.get("url_amazon") else None,
                 "link_shopee": product.get("url_shopee"),
                 "fotos": [AFILIADO_DIR / foto for foto in product["fotos"]],
             }
@@ -295,7 +292,7 @@ def render_product_jsonld(p: dict, image_url: str) -> str:
         if preco_num is not None:
             data["offers"] = {
                 "@type": "Offer",
-                "url": p["link"],
+                "url": p.get("link") or p.get("link_shopee"),
                 "priceCurrency": "BRL",
                 "price": f"{preco_num:.2f}",
                 "availability": "https://schema.org/InStock",
@@ -350,7 +347,7 @@ def _slug(texto: str) -> str:
 
 
 def render_card(p: dict) -> str:
-    lojas = "amazon" + (" shopee" if p.get("link_shopee") else "")
+    lojas = " ".join(loja for loja, tem in (("amazon", p.get("link")), ("shopee", p.get("link_shopee"))) if tem)
     if p.get("desconto_pct"):
         badge = f'<span class="badge-desconto">-{p["desconto_pct"]}%</span>'
     elif p.get("destaque"):
@@ -500,7 +497,7 @@ def render_product_page(p: dict, tem_shopee: bool) -> str:
 {preco_original_html}
 {preco_html}
 <div class="btn-row">
-<a class="btn-comprar" href="{p['link']}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Amazon)</a>
+{f'<a class="btn-comprar" href="{p["link"]}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Amazon)</a>' if p.get('link') else ''}
 {f'<a class="btn-comprar shopee" href="{p["link_shopee"]}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Shopee)</a>' if p.get('link_shopee') else ''}
 </div>
 {render_comments(p)}
