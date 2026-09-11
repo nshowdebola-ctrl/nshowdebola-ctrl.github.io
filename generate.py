@@ -151,83 +151,121 @@ DISCLOSURE = (
     "através dos links de produtos, sem nenhum custo extra para você."
 )
 
-# Fundo claro fixo (não segue tema claro/escuro do sistema), inspirado no
-# visual do achadinhosexpress.com.br: página em cinza bem claro, cards
-# brancos com sombra suave, menu de lojas no topo.
+# Fundo claro fixo (não segue tema claro/escuro do sistema). Cabeçalho e
+# rodapé em faixa escura full-bleed (edge-to-edge) pra dar identidade de
+# marca; conteúdo central limitado a 1080px via .wrap. Fonte Plus Jakarta
+# Sans (Google Fonts) no lugar da system-ui genérica.
+GOOGLE_FONTS_LINK = '''<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">'''
+
 BASE_CSS = """
 :root {
   color-scheme: light;
-  --accent: #ff9900;
+  --accent: #f59e0b;
+  --accent-dark: #d97706;
   --accent-shopee: #ee4d2d;
-  --bg: #f3f4f6;
-  --fg: #1a1a1a;
+  --bg: #f7f7f8;
+  --fg: #16181d;
   --card-bg: #ffffff;
-  --border: #e5e7eb;
+  --border: #e7e8ec;
   --muted: #6b7280;
+  --header-bg: #15161b;
+  --header-fg: #f4f4f5;
+  --radius: 14px;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+  --shadow-md: 0 6px 16px rgba(16,24,40,.10);
+  --shadow-lg: 0 16px 32px rgba(16,24,40,.16);
 }
-body { font-family: system-ui, sans-serif; max-width: 1080px; margin: 0 auto; padding: 16px;
-  background: var(--bg); color: var(--fg); }
-header.topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  gap: 12px; padding: 12px 0; }
+* { box-sizing: border-box; }
+body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; margin: 0;
+  background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px 48px; }
+header.topbar { position: sticky; top: 0; z-index: 50; background: var(--header-bg); color: var(--header-fg);
+  box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.topbar-inner { max-width: 1080px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
-.brand .logo-sm { width: 40px; height: 40px; object-fit: contain; }
-.brand .brand-name { font-weight: 800; font-size: 1.1rem; }
-nav.topnav { display: flex; align-items: center; gap: 20px; }
-nav.topnav a { color: inherit; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+.brand .logo-sm { width: 36px; height: 36px; object-fit: contain; border-radius: 8px; }
+.brand .brand-name { font-weight: 800; font-size: 1.08rem; letter-spacing: -.01em; }
+nav.topnav { display: flex; align-items: center; gap: 22px; }
+nav.topnav a { color: rgba(244,244,245,.85); text-decoration: none; font-weight: 600; font-size: 0.88rem;
+  transition: color .15s; }
 nav.topnav a:hover { color: var(--accent); }
 h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap; }
-.tagline { color: var(--muted); text-align: center; margin: 12px 0; }
-nav.lojas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 20px 0 8px;
-  background: var(--card-bg); border-radius: 12px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.hero { text-align: center; padding: 36px 0 8px; }
+.hero .tagline { color: var(--muted); font-size: 1.02rem; margin: 0 auto; max-width: 540px; line-height: 1.5; }
+.hero .kicker { display: inline-block; background: rgba(245,158,11,.12); color: var(--accent-dark);
+  font-weight: 700; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 20px; margin-bottom: 10px; }
+nav.lojas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 24px 0 10px;
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 10px;
+  box-shadow: var(--shadow-sm); }
 nav.lojas button { font: inherit; cursor: pointer; background: transparent; border: 1px solid var(--border);
-  color: inherit; font-size: 0.85rem; font-weight: 700; padding: 8px 16px; border-radius: 20px; }
+  color: inherit; font-size: 0.85rem; font-weight: 700; padding: 8px 18px; border-radius: 20px;
+  transition: border-color .15s, background .15s, color .15s; }
 nav.lojas button:hover { border-color: var(--accent); }
-nav.lojas button.active { background: var(--accent); border-color: var(--accent); color: #111; }
-nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 20px; }
+nav.lojas button.active { background: var(--accent); border-color: var(--accent); color: #17130a; }
+nav.categorias { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 0 0 24px; }
 nav.categorias a { background: var(--card-bg); border: 1px solid var(--border); color: inherit;
-  text-decoration: none; font-size: 0.8rem; font-weight: 600; padding: 5px 12px; border-radius: 20px; }
-nav.categorias a:hover { border-color: var(--accent); color: var(--accent); }
-section.categoria { margin: 32px 0; }
-section.categoria h2 { font-size: 1.2rem; border-left: 4px solid var(--accent); padding-left: 10px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; margin: 16px 0; }
-.card { position: relative; border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  text-decoration: none; font-size: 0.8rem; font-weight: 600; padding: 6px 14px; border-radius: 20px;
+  transition: border-color .15s, color .15s; }
+nav.categorias a:hover { border-color: var(--accent); color: var(--accent-dark); }
+section.categoria { margin: 36px 0; }
+section.categoria h2 { font-size: 1.2rem; font-weight: 800; letter-spacing: -.01em;
+  border-left: 4px solid var(--accent); padding-left: 12px; margin: 0 0 4px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px; margin: 18px 0; }
+.card { position: relative; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
   text-decoration: none; color: inherit; display: flex; flex-direction: column; background: var(--card-bg);
-  box-shadow: 0 1px 3px rgba(0,0,0,.06); transition: transform .15s, box-shadow .15s; }
-.card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
-.card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-.card .badge-desconto { position: absolute; top: 8px; left: 8px; background: #e11d48; color: #fff;
-  font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
-.card .info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; }
-.card .titulo { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; flex: 1; }
-.card .preco-original { color: var(--muted); text-decoration: line-through; font-size: 0.8rem; margin: 0; }
-.card .preco { color: #c0392b; font-weight: 700; margin: 0 0 8px; }
-.card .cta { align-self: flex-start; background: var(--accent); color: #111; font-weight: 700;
-  font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; }
+  box-shadow: var(--shadow-sm); transition: transform .2s ease, box-shadow .2s ease; }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #fafafa;
+  transition: transform .35s ease; }
+.card:hover img { transform: scale(1.05); }
+.card .badge-desconto { position: absolute; top: 10px; left: 10px;
+  background: linear-gradient(135deg, #f43f5e, #be123c); color: #fff; font-size: 0.72rem; font-weight: 800;
+  padding: 4px 9px; border-radius: 7px; letter-spacing: .01em; box-shadow: 0 3px 8px rgba(190,18,60,.35); }
+.card .info { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.card .titulo { font-size: 0.89rem; font-weight: 600; line-height: 1.35; margin: 0 0 2px; flex: 1; }
+.card .preco-original { color: var(--muted); text-decoration: line-through; font-size: 0.78rem; margin: 0; }
+.card .preco { color: #c0392b; font-weight: 800; font-size: 1.04rem; margin: 2px 0 10px; }
+.card .cta { display: block; text-align: center; background: var(--accent); color: #17130a; font-weight: 700;
+  font-size: 0.82rem; padding: 9px 12px; border-radius: 9px; transition: background .15s, color .15s; }
+.card:hover .cta { background: var(--accent-dark); color: #fff; }
 .ofertas-carousel { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
   margin: 20px 0; padding-bottom: 4px; scrollbar-width: none; }
 .ofertas-carousel::-webkit-scrollbar { display: none; }
 .oferta-dia { flex: 0 0 auto; scroll-snap-align: start; width: min(360px, 88vw);
   display: flex; gap: 16px; align-items: center; background: var(--card-bg);
-  border: 2px solid #e11d48; border-radius: 12px; padding: 16px; text-decoration: none;
-  color: inherit; box-shadow: 0 2px 8px rgba(225,29,72,.15); }
-.oferta-dia img { width: 90px; height: 90px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+  border: 2px solid #e11d48; border-radius: var(--radius); padding: 16px; text-decoration: none;
+  color: inherit; box-shadow: 0 4px 14px rgba(225,29,72,.18); }
+.oferta-dia img { width: 90px; height: 90px; object-fit: cover; border-radius: 9px; flex-shrink: 0; }
 .oferta-dia .tag { display: inline-block; background: #e11d48; color: #fff; font-weight: 800;
   font-size: 0.75rem; padding: 3px 10px; border-radius: 6px; margin-bottom: 6px; }
 .oferta-dia .titulo { font-weight: 700; margin: 0 0 4px; font-size: 0.9rem; }
-.produto-foto { width: 100%; max-width: 420px; border-radius: 10px; display: block; margin: 16px auto;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
-.btn-comprar { display: inline-block; background: var(--accent); color: #111; font-weight: 700;
-  padding: 12px 24px; border-radius: 8px; text-decoration: none; }
+.produto-foto { width: 100%; max-width: 420px; border-radius: var(--radius); display: block; margin: 20px auto;
+  box-shadow: var(--shadow-md); background: #fafafa; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0; }
+.btn-comprar { display: inline-block; background: var(--accent); color: #17130a; font-weight: 800;
+  font-size: .96rem; padding: 13px 26px; border-radius: 11px; text-decoration: none;
+  box-shadow: var(--shadow-md); transition: transform .15s ease, box-shadow .15s ease, background .15s; }
+.btn-comprar:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); background: var(--accent-dark); }
 .btn-comprar.shopee { background: var(--accent-shopee); color: #fff; }
-.disclosure { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 40px; padding-top: 12px; }
-.disclosure a { color: inherit; }
-a.voltar { display: inline-block; margin-bottom: 16px; }
-.social { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; justify-content: center; }
-.social a { display: inline-block; background: #222; color: #fff; text-decoration: none;
-  font-size: 0.85rem; font-weight: 600; padding: 8px 14px; border-radius: 20px; }
-.social a:hover { background: #444; }
+.btn-comprar.shopee:hover { background: #d43f22; }
+a.voltar { display: inline-block; margin: 20px 0 4px; color: var(--muted); text-decoration: none; font-weight: 600;
+  font-size: .88rem; }
+a.voltar:hover { color: var(--accent-dark); }
+footer.site-footer { background: var(--header-bg); color: rgba(244,244,245,.75); margin-top: 56px; }
+.footer-inner { max-width: 1080px; margin: 0 auto; padding: 32px 16px 24px; text-align: center; }
+.footer-inner p { margin: 0 0 14px; font-weight: 600; color: var(--header-fg); }
+.social { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 18px; justify-content: center; }
+.social a { display: inline-block; background: rgba(255,255,255,.08); color: #fff; text-decoration: none;
+  font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border-radius: 20px; transition: background .15s; }
+.social a:hover { background: rgba(255,255,255,.16); }
+.disclosure { font-size: 0.78rem; color: rgba(244,244,245,.55); border-top: 1px solid rgba(255,255,255,.1);
+  margin: 0; padding-top: 16px; }
+.disclosure a { color: rgba(244,244,245,.8); }
 """
 
 STORE_FILTER_JS = """
@@ -304,15 +342,17 @@ def render_topbar(base_path: str, tem_shopee: bool) -> str:
     logo_html = f'<img class="logo-sm" src="{base_path}assets/logo.png" alt="{SITE_TITLE}">' if LOGO_PATH.exists() else ""
     shopee_link = f'<a href="{base_path}index.html#vitrine">Shopee</a>' if tem_shopee else ""
     return f'''<header class="topbar">
-  <a class="brand" href="{base_path}index.html">
-    {logo_html}
-    <span class="brand-name">{SITE_TITLE}</span>
-  </a>
-  <nav class="topnav">
-    <a href="{base_path}index.html#vitrine">Amazon</a>
-    {shopee_link}
-    <a href="{base_path}sobre.html">Sobre</a>
-  </nav>
+  <div class="topbar-inner">
+    <a class="brand" href="{base_path}index.html">
+      {logo_html}
+      <span class="brand-name">{SITE_TITLE}</span>
+    </a>
+    <nav class="topnav">
+      <a href="{base_path}index.html#vitrine">Amazon</a>
+      {shopee_link}
+      <a href="{base_path}sobre.html">Sobre</a>
+    </nav>
+  </div>
 </header>'''
 
 
@@ -322,6 +362,16 @@ def render_social_links() -> str:
         for label, url in SOCIAL_LINKS
     )
     return f'<div class="social">\n{links}\n</div>'
+
+
+def render_footer(base_path: str) -> str:
+    return f'''<footer class="site-footer">
+  <div class="footer-inner">
+    <p>Segue a gente pra mais achadinhos:</p>
+    {render_social_links()}
+    <p class="disclosure"><a href="{base_path}sobre.html#aviso">Aviso de afiliado</a></p>
+  </div>
+</footer>'''
 
 
 def render_comments(p: dict) -> str:
@@ -440,24 +490,26 @@ def render_index(products: list[dict]) -> str:
 <title>{SITE_TITLE} — achadinhos da Amazon com preço bom</title>
 <meta name="description" content="Seleção de achadinhos da Amazon: produtos úteis e baratos, com link direto pra comprar.">
 {render_meta_seo(SITE_URL + "/", SITE_TITLE, "Seleção de achadinhos da Amazon: produtos úteis e baratos, com link direto pra comprar.", f"{SITE_URL}/assets/logo.png" if LOGO_PATH.exists() else None)}
+{GOOGLE_FONTS_LINK}
 <style>{BASE_CSS}</style>
 <script>{STORE_FILTER_JS}</script>
 </head>
 <body>
 {render_topbar("", tem_shopee)}
+<div class="wrap">
 <h1 class="sr-only">{SITE_TITLE}</h1>
+<div class="hero">
+<span class="kicker">Curadoria diária</span>
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
+</div>
 {render_ofertas(products)}
 {render_store_nav(products)}
 <nav class="categorias">
 {nav}
 </nav>
 {sections}
-<footer>
-<p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
-{render_social_links()}
-<p class="disclosure"><a href="sobre.html#aviso">Aviso de afiliado</a></p>
-</footer>
+</div>
+{render_footer("")}
 </body>
 </html>
 """
@@ -486,10 +538,12 @@ def render_product_page(p: dict, tem_shopee: bool) -> str:
 <meta name="description" content="{html.escape(descricao_seo)}">
 {render_meta_seo(f"{SITE_URL}/produtos/{p['id']}.html", p['titulo'], descricao_seo, imagem_absoluta)}
 {render_product_jsonld(p, imagem_absoluta)}
+{GOOGLE_FONTS_LINK}
 <style>{BASE_CSS}</style>
 </head>
 <body>
 {render_topbar("../", tem_shopee)}
+<div class="wrap">
 <a class="voltar" href="../index.html">&larr; Voltar</a>
 <h1>{html.escape(p['titulo'])}</h1>
 <img class="produto-foto" src="../{p['foto_web']}" alt="{html.escape(p['titulo'])}">
@@ -501,11 +555,8 @@ def render_product_page(p: dict, tem_shopee: bool) -> str:
 {f'<a class="btn-comprar shopee" href="{p["link_shopee"]}" rel="nofollow sponsored noopener" target="_blank">{CTA_TEXTO} (Shopee)</a>' if p.get('link_shopee') else ''}
 </div>
 {render_comments(p)}
-<footer>
-<p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
-{render_social_links()}
-<p class="disclosure"><a href="../sobre.html#aviso">Aviso de afiliado</a></p>
-</footer>
+</div>
+{render_footer("../")}
 </body>
 </html>
 """
@@ -520,21 +571,21 @@ def render_sobre_page(tem_shopee: bool) -> str:
 <title>Sobre — {SITE_TITLE}</title>
 <meta name="description" content="Quem somos e como funciona o {SITE_TITLE}.">
 {render_meta_seo(f"{SITE_URL}/sobre.html", f"Sobre — {SITE_TITLE}", f"Quem somos e como funciona o {SITE_TITLE}.")}
+{GOOGLE_FONTS_LINK}
 <style>{BASE_CSS}</style>
 </head>
 <body>
 {render_topbar("", tem_shopee)}
+<div class="wrap">
 <a class="voltar" href="index.html">&larr; Voltar</a>
 <h1>Sobre o {SITE_TITLE}</h1>
 <p>O {SITE_TITLE} é um site de curadoria: selecionamos achadinhos da Amazon (e, em breve,
 da Shopee) que a gente também divulga no TikTok, e reunimos tudo aqui com o link direto pra
 comprar. Não somos Amazon nem Shopee — as compras são feitas diretamente nos sites das lojas
 parceiras.</p>
-<p class="disclosure" id="aviso">{DISCLOSURE}</p>
-<footer>
-<p style="text-align:center;">Segue a gente pra mais achadinhos:</p>
-{render_social_links()}
-</footer>
+<p class="disclosure" id="aviso" style="color:var(--muted); border-top:1px solid var(--border); padding-top:16px;">{DISCLOSURE}</p>
+</div>
+{render_footer("")}
 </body>
 </html>
 """
