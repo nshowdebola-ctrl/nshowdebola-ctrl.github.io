@@ -142,6 +142,7 @@ CUSDIS_APP_ID = "bc04f0f0-fc8f-46cc-83f7-82436325048f"
 SOCIAL_LINKS = [
     ("TikTok · @achadinhosmultiuso10", "https://www.tiktok.com/@achadinhosmultiuso10"),
     ("YouTube · Notícias Show de Bola", "https://www.youtube.com/@NoticiasShowdeBola"),
+    ("Telegram · Achadinhos da Web", "https://t.me/+A_pShcFvAcM1NDZh"),
 ]
 
 CTA_TEXTO = "🛒 Quero esse!"
