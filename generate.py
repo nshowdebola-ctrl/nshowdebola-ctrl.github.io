@@ -32,7 +32,8 @@ CATEGORY_ORDER = [
     "Casa & Utilidades",
     "Beleza",
     "Livros",
-    "Esportes & Brinquedos",
+    "Esportes",
+    "Brinquedos",
     "Ofertas",
 ]
 
