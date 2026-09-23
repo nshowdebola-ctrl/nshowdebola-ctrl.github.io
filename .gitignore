@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# listas de e-mail locais: nunca publicar no site
+e-mail*.txt
