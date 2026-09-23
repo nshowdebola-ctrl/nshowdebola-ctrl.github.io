@@ -140,15 +140,9 @@ def copy_photos(products: list[dict]) -> None:
 # (nshowdebola-ctrl.github.io) e cole o App ID gerado aqui:
 CUSDIS_APP_ID = "bc04f0f0-fc8f-46cc-83f7-82436325048f"
 
-# Link de convite público do grupo. Gerado via Bot API (exportChatInviteLink) —
-# atenção: chamar esse método de novo REVOGA este link e gera outro, então não
-# regenerar sem necessidade real (ex: vazamento/abuso do link atual).
-TELEGRAM_LINK = "https://t.me/+cuM1cf2MUiZjODgx"
-
 SOCIAL_LINKS = [
     ("TikTok · @achadinhosmultiuso10", "https://www.tiktok.com/@achadinhosmultiuso10"),
     ("YouTube · Notícias Show de Bola", "https://www.youtube.com/@NoticiasShowdeBola"),
-    ("Telegram · Achadinhos da Web", TELEGRAM_LINK),
 ]
 
 CTA_TEXTO = "🛒 Quero esse!"
@@ -199,10 +193,6 @@ nav.topnav { display: flex; align-items: center; gap: 22px; }
 nav.topnav a { color: rgba(244,244,245,.85); text-decoration: none; font-weight: 600; font-size: 0.88rem;
   transition: color .15s; }
 nav.topnav a:hover { color: var(--accent); }
-.btn-telegram { display: inline-flex; align-items: center; gap: 6px; background: #26A5E4; color: #fff;
-  text-decoration: none; font-weight: 700; font-size: 0.82rem; padding: 8px 16px; border-radius: 20px;
-  transition: background .15s, transform .15s; white-space: nowrap; }
-.btn-telegram:hover { background: #1e8bc3; transform: translateY(-1px); }
 h1.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); white-space: nowrap; }
 .hero { text-align: center; padding: 36px 0 8px; }
@@ -363,7 +353,6 @@ def render_topbar(base_path: str, tem_shopee: bool) -> str:
       {shopee_link}
       <a href="{base_path}sobre.html">Sobre</a>
     </nav>
-    <a class="btn-telegram" href="{TELEGRAM_LINK}" target="_blank" rel="noopener">📲 Entrar no grupo</a>
   </div>
 </header>'''
 
