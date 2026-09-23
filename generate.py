@@ -146,11 +146,17 @@ GOATCOUNTER_CODE = ""
 
 CONTATO_EMAIL = "nshowdebola@gmail.com"
 
+# Link do Google Forms de inscrição na newsletter (só quem se inscreve recebe).
+# Vazio = faixa e link do rodapé não aparecem.
+NEWSLETTER_FORM_URL = ""
+
 SOCIAL_LINKS = [
     ("TikTok · @achadinhosmultiuso10", "https://www.tiktok.com/@achadinhosmultiuso10"),
     ("YouTube · Notícias Show de Bola", "https://www.youtube.com/@NoticiasShowdeBola"),
     (f"E-mail · {CONTATO_EMAIL}", f"mailto:{CONTATO_EMAIL}"),
 ]
+if NEWSLETTER_FORM_URL:
+    SOCIAL_LINKS.append(("📬 Newsletter", NEWSLETTER_FORM_URL))
 
 CTA_TEXTO = "🛒 Quero esse!"
 
@@ -268,6 +274,15 @@ section.categoria h2 { font-size: 1.2rem; font-weight: 800; letter-spacing: -.01
 a.voltar { display: inline-block; margin: 20px 0 4px; color: var(--muted); text-decoration: none; font-weight: 600;
   font-size: .88rem; }
 a.voltar:hover { color: var(--accent-dark); }
+.newsletter { text-align: center; margin: 36px 0 8px; padding: 28px 20px; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(245,158,11,.14), rgba(245,158,11,.04));
+  border: 1px solid rgba(245,158,11,.35); }
+.newsletter h2 { margin: 0 0 8px; font-size: 1.25rem; }
+.newsletter p { margin: 0 0 18px; color: var(--muted); line-height: 1.5; }
+.newsletter .btn-newsletter { display: inline-block; background: var(--accent); color: #15161b;
+  text-decoration: none; font-weight: 800; padding: 12px 26px; border-radius: 999px;
+  box-shadow: var(--shadow-sm); transition: filter .15s, transform .15s; }
+.newsletter .btn-newsletter:hover { filter: brightness(.92); transform: translateY(-1px); }
 footer.site-footer { background: var(--header-bg); color: rgba(244,244,245,.75); margin-top: 56px; }
 .footer-inner { max-width: 1080px; margin: 0 auto; padding: 32px 16px 24px; text-align: center; }
 .footer-inner p { margin: 0 0 14px; font-weight: 600; color: var(--header-fg); }
@@ -367,6 +382,16 @@ def render_topbar(base_path: str, tem_shopee: bool) -> str:
     <a class="btn-email" href="mailto:{CONTATO_EMAIL}">✉️ Contato</a>
   </div>
 </header>'''
+
+
+def render_newsletter() -> str:
+    if not NEWSLETTER_FORM_URL:
+        return ""
+    return f'''<section class="newsletter">
+  <h2>📬 Receba os achadinhos da semana no seu e-mail</h2>
+  <p>Uma vez por semana, só as melhores ofertas.<br>Sem spam, cancele quando quiser.</p>
+  <a class="btn-newsletter" href="{NEWSLETTER_FORM_URL}" target="_blank" rel="noopener">✉️ Quero receber</a>
+</section>'''
 
 
 def render_social_links() -> str:
@@ -524,6 +549,7 @@ def render_index(products: list[dict]) -> str:
 <p class="tagline">Selecionamos os melhores achadinhos todos os dias — clique pra ver e comprar.</p>
 </div>
 {render_ofertas(products)}
+{render_newsletter()}
 {render_store_nav(products)}
 <nav class="categorias">
 {nav}
