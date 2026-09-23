@@ -140,6 +140,10 @@ def copy_photos(products: list[dict]) -> None:
 # (nshowdebola-ctrl.github.io) e cole o App ID gerado aqui:
 CUSDIS_APP_ID = "bc04f0f0-fc8f-46cc-83f7-82436325048f"
 
+# Contador de visitas. Crie uma conta grátis em https://www.goatcounter.com e
+# cole aqui o código escolhido (o "xxx" de xxx.goatcounter.com). Vazio = sem contador.
+GOATCOUNTER_CODE = ""
+
 CONTATO_EMAIL = "nshowdebola@gmail.com"
 
 SOCIAL_LINKS = [
@@ -383,6 +387,13 @@ def render_footer(base_path: str) -> str:
 </footer>'''
 
 
+def render_analytics() -> str:
+    if not GOATCOUNTER_CODE:
+        return ""
+    return (f'<script data-goatcounter="https://{GOATCOUNTER_CODE}.goatcounter.com/count"\n'
+            f'  async src="//gc.zgo.at/count.js"></script>')
+
+
 def render_comments(p: dict) -> str:
     if not CUSDIS_APP_ID:
         return ""
@@ -501,6 +512,7 @@ def render_index(products: list[dict]) -> str:
 {render_meta_seo(SITE_URL + "/", SITE_TITLE, "Seleção de achadinhos da Amazon: produtos úteis e baratos, com link direto pra comprar.", f"{SITE_URL}/assets/logo.png" if LOGO_PATH.exists() else None)}
 {GOOGLE_FONTS_LINK}
 <style>{BASE_CSS}</style>
+{render_analytics()}
 <script>{STORE_FILTER_JS}</script>
 </head>
 <body>
@@ -549,6 +561,7 @@ def render_product_page(p: dict, tem_shopee: bool) -> str:
 {render_product_jsonld(p, imagem_absoluta)}
 {GOOGLE_FONTS_LINK}
 <style>{BASE_CSS}</style>
+{render_analytics()}
 </head>
 <body>
 {render_topbar("../", tem_shopee)}
@@ -582,6 +595,7 @@ def render_sobre_page(tem_shopee: bool) -> str:
 {render_meta_seo(f"{SITE_URL}/sobre.html", f"Sobre — {SITE_TITLE}", f"Quem somos e como funciona o {SITE_TITLE}.")}
 {GOOGLE_FONTS_LINK}
 <style>{BASE_CSS}</style>
+{render_analytics()}
 </head>
 <body>
 {render_topbar("", tem_shopee)}
