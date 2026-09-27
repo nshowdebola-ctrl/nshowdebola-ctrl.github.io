@@ -8,6 +8,7 @@ import html
 import json
 import re
 import shutil
+import sys
 from pathlib import Path
 
 AFILIADO_DIR = Path("/home/alex/projetos/afiliado-tiktok")
@@ -27,6 +28,11 @@ SITE_URL = "https://nshowdebola-ctrl.github.io"
 # Ordem fixa de exibição das categorias. Qualquer categoria nova (ou produto
 # sem "categoria" definida, que cai em "Outros") aparece depois, em ordem
 # alfabética.
+# Calendário de datas comemorativas (Dia das Crianças, Natal...) mora no
+# afiliado-tiktok, junto da busca sazonal que alimenta o catálogo.
+sys.path.insert(0, str(AFILIADO_DIR))
+from config.datas_comemorativas import campanhas_ativas  # noqa: E402
+
 CATEGORY_ORDER = [
     "Eletrônicos",
     "Casa & Utilidades",
@@ -109,6 +115,7 @@ def collect_posted_products(tag: str) -> list[dict]:
                 "desconto_pct": _desconto_pct(product.get("preco"), product.get("preco_original")),
                 "destaque": bool(product.get("destaque")),
                 "categoria": product.get("categoria", "Outros"),
+                "campanha": product.get("campanha"),
                 "link": _affiliate_link(product["url_amazon"], tag) if product.get("url_amazon") else None,
                 "link_shopee": product.get("url_shopee"),
                 "fotos": [AFILIADO_DIR / foto for foto in product["fotos"]],
@@ -512,11 +519,34 @@ def render_store_nav(products: list[dict]) -> str:
     return f'<nav class="lojas" id="vitrine">\n{"".join(botoes)}\n</nav>'
 
 
+def render_campanhas(products: list[dict]) -> tuple[str, str]:
+    """Seção especial pra cada data comemorativa ativa (ex: Dia das Crianças),
+    no topo da vitrine: produtos achados pela busca da campanha + as
+    `categorias_vitrine` dela. Devolve (links pro nav, seções)."""
+    nav, sections = [], []
+    for camp in campanhas_ativas():
+        itens = [p for p in products
+                 if p.get("campanha") == camp["id"] or p["categoria"] in camp.get("categorias_vitrine", [])]
+        if not itens:
+            continue
+        faltam = camp["dias_faltando"]
+        quando = "é hoje!" if faltam == 0 else ("é amanhã" if faltam == 1 else f"faltam {faltam} dias")
+        nav.append(f'<a href="#{camp["id"]}">🎁 {html.escape(camp["nome"])}</a>')
+        sections.append(f'''<section class="categoria" id="{camp["id"]}">
+  <h2>🎁 Especial {html.escape(camp["nome"])} <small style="font-weight:600;color:var(--accent-dark);">· {quando}</small></h2>
+  <div class="grid">
+    {"".join(render_card(p) for p in itens)}
+  </div>
+</section>''')
+    return "\n".join(nav), "\n".join(sections)
+
+
 def render_index(products: list[dict]) -> str:
     tem_shopee = any(p.get("link_shopee") for p in products)
     grouped = group_by_category(products)
+    nav_campanhas, sections_campanhas = render_campanhas(products)
 
-    nav = "\n".join(f'<a href="#{_slug(cat)}">{html.escape(cat)}</a>' for cat, _ in grouped)
+    nav = nav_campanhas + "\n" + "\n".join(f'<a href="#{_slug(cat)}">{html.escape(cat)}</a>' for cat, _ in grouped)
     sections = "\n".join(
         f'''<section class="categoria" id="{_slug(cat)}">
   <h2>{html.escape(cat)}</h2>
@@ -554,6 +584,7 @@ def render_index(products: list[dict]) -> str:
 <nav class="categorias">
 {nav}
 </nav>
+{sections_campanhas}
 {sections}
 </div>
 {render_footer("")}
